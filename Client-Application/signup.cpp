@@ -38,7 +38,7 @@ bool SignUp::_checkPassword(QString password, QString ConfirmPassword) const
 void SignUp::_connect()
 {
 
-    socket->connectToHost("192.168.0.227",quint16(5555));
+    socket->connectToHost("192.168.1.131",quint16(5555));
     socket->open(QIODevice::ReadWrite);
 
 }

@@ -33,3 +33,7 @@ void Server::listen_()
 	listen(server_socket, 0);
 	//while
 }
+
+void Server::send()
+{
+}

@@ -29,7 +29,7 @@ QString MainWindow::_receiveFromServer()
 
 void MainWindow::_connectToServer()
 {
-    m_clientSocket->connectToHost("192.168.0.227",quint16(5555));
+    m_clientSocket->connectToHost("192.168.1.131",quint16(5555));
     m_clientSocket->open(QIODevice::ReadWrite);
     if(m_clientSocket->isOpen())
     {

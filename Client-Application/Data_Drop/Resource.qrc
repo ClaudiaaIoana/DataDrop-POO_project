@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>backgr.jpg</file>
+        <file>post.ico</file>
+        <file>User (2).png</file>
+        <file>PadLock (2).png</file>
+        <file>Email (2).png</file>
+        <file>see.png</file>
+    </qresource>
+    <qresource prefix="/Resources"/>
+</RCC>

@@ -4,6 +4,8 @@
 
 #include <QMainWindow>
 #include <QTcpSocket>
+#include "networkclient.h"
+
 
 
 QT_BEGIN_NAMESPACE
@@ -22,11 +24,6 @@ public:
     ~MainWindow();
 
 private slots:
-    QString _receiveFromServer();
-
-    void _connectToServer();
-
-    void _sendToServer(QString message);
 
     void on_ButtonLogIn_clicked();
 
@@ -37,9 +34,8 @@ private slots:
     void on_SeePassword_pressed();
 
 private:
+    NetworkClient *NetworkManager;
     Ui::MainWindow *ui;
     SignUp *SignUpWindow;
-    QTcpSocket *m_clientSocket;
-
 };
 #endif // MAINWINDOW_H

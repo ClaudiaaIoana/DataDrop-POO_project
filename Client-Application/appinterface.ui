@@ -63,7 +63,10 @@
      </size>
     </property>
     <property name="styleSheet">
-     <string notr="true">image: url(:/qwd83nc4xxf41.jpg);</string>
+     <string notr="true">image: url(:/qwd83nc4xxf41.jpg); 
+background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.8;</string>
     </property>
     <widget class="QPushButton" name="sendButton">
      <property name="geometry">
@@ -108,23 +111,37 @@ background:transparent;
      <property name="font">
       <font>
        <family>Segoe UI</family>
-       <pointsize>9</pointsize>
+       <pointsize>-1</pointsize>
        <italic>true</italic>
        <bold>false</bold>
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">border-radius: 10px;
-font: italic 9pt &quot;Segoe UI&quot;;
-background-color: rgb(255,255,255);
+      <string notr="true">#TextLineEdit{
+    background-color: white;
+    padding: 5px; 
+    font-size: 14px;
+    color: black;
+    outline: none;
+}
 
- background-repeat: no; 
-  width: 200px;
-  height: 50px;
-  padding: 0;
-  border: none;
-  cursor: pointer; 
- display: inline-block;
+#TextLineEdit:hover {
+    border-color: #0078d7;  
+
+}
+
+#TextLineEdit:focus {
+    border-color: #0078d7;
+    box-shadow: 0 0 5px #0078d7;
+   
+}
+  
+    
+    
+
+
+ 
+
 </string>
      </property>
     </widget>
@@ -169,12 +186,12 @@ background:transparent;
      <string notr="true">background-color: rgb(245, 245, 245);</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelText">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>130</x>
       <y>0</y>
-      <width>131</width>
+      <width>121</width>
       <height>41</height>
      </rect>
     </property>
@@ -182,13 +199,13 @@ background:transparent;
      <string notr="true">background-color: transparent;
     color: #1E90FF;
     font-family: Arial;
-    font-size: 24px;
+    font-size: 14px;
     font-weight: bold;
     text-align: center;
     border: none;</string>
     </property>
     <property name="text">
-     <string>       Salut!</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLineEdit" name="Search">

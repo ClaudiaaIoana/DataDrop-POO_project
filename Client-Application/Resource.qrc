@@ -16,6 +16,7 @@
         <file>qwd83nc4xxf41.jpg</file>
         <file>send-message.png</file>
         <file>attach.png</file>
+        <file>teamwork.png</file>
     </qresource>
     <qresource prefix="/Resources"/>
 </RCC>

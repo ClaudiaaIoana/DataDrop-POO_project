@@ -1,6 +1,7 @@
 #ifndef ABSTRACT_USER_H
 #define ABSTRACT_USER_H
 #include "Utility.h"
+#include <QString>
 
 class Abstract_User
 {
@@ -13,6 +14,14 @@ protected:
 public:
     Abstract_User();
     Abstract_User(string Email,string Username, vector <string> UserFriends,vector <string> GroupName);
+    //get-ere
+    string _getUsername()const;
+    int _getSizeFriendBuffer()const;
+    int _getSizeGroups()const;
+    string _getUsernameIndex(int i) const;
+    string _getGroupIndex(int i) const;
+    //push-uri in vector
+    void _addFriend(QString username);
 
 };
 

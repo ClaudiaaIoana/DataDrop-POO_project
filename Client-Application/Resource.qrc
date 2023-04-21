@@ -7,6 +7,15 @@
         <file>Email (2).png</file>
         <file>logo.ico</file>
         <file>LogoImage.png</file>
+        <file>message.png</file>
+        <file>man_person.png</file>
+        <file>ChatG.png</file>
+        <file>add-user.png</file>
+        <file>groups.png</file>
+        <file>backgroundMess.png</file>
+        <file>qwd83nc4xxf41.jpg</file>
+        <file>send-message.png</file>
+        <file>attach.png</file>
     </qresource>
     <qresource prefix="/Resources"/>
 </RCC>

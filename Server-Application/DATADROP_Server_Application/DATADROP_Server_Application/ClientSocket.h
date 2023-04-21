@@ -4,8 +4,7 @@
 #include <iostream>
 #include<string>
 #include <winsock2.h>
-#include"Socket.h"
-class ClientSocket:public IVirtualSocket
+class ClientSocket
 {
 	std::string			client_username;
 	SOCKET				socket;

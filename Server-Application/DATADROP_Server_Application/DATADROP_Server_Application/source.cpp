@@ -4,7 +4,10 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
+#include"Connection_manager.h"
+
 int main()
 {
+	Connection_manager* con = Connection_manager::get_instance();
 
 }

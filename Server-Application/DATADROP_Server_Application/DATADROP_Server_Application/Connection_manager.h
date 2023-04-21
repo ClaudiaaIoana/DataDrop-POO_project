@@ -6,25 +6,25 @@
 #include<map>
 #include <winsock2.h>
 #include"ClientSocket.h"
-#include"_IServer.h"
+#include"_IConnection_manager.h"
 
-class Server:public _IServer
+class Connection_manager:public _IConnection_manager
 {
 private:
-	static Server*				instance;
+	static Connection_manager*				instance;
 	std::vector<ClientSocket>	conected_users_sockets;
 	std::vector<SOCKET>			conected_device_sockets;
 	SOCKET						server_socket;
 	SOCKADDR_IN					server_address;
 	WSADATA						WSAData;
 private:
-	Server();
-	~Server() = default;
+	Connection_manager();
+	~Connection_manager() = default;
 public:
-	static Server* get_instance();
+	static Connection_manager* get_instance();
 	static void destroy_instance();
 	void listen_();
-	void send();
 	void acceptConnection();
+	bool login(char* buffer);
 };
 

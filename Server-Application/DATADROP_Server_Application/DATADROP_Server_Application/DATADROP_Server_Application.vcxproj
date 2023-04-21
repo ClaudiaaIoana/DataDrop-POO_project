@@ -138,8 +138,7 @@
     <ClCompile Include="Exception_sending.cpp" />
     <ClCompile Include="_IDB.cpp" />
     <ClCompile Include="Log.cpp" />
-    <ClCompile Include="Server.cpp" />
-    <ClCompile Include="Socket.cpp" />
+    <ClCompile Include="Connection_manager.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="_IException.cpp" />
     <ClCompile Include="_IServer.cpp" />
@@ -156,10 +155,9 @@
     <ClInclude Include="Exception_sending.h" />
     <ClInclude Include="_IDB.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="Server.h" />
-    <ClInclude Include="Socket.h" />
+    <ClInclude Include="Connection_manager.h" />
     <ClInclude Include="_IException.h" />
-    <ClInclude Include="_IServer.h" />
+    <ClInclude Include="_IConnection_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />

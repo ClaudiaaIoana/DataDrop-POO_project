@@ -15,13 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Server.cpp">
+    <ClCompile Include="Connection_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Socket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ClientSocket.cpp">
@@ -65,10 +62,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Server.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Socket.h">
+    <ClInclude Include="Connection_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ClientSocket.h">
@@ -80,7 +74,7 @@
     <ClInclude Include="DB_user.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_IServer.h">
+    <ClInclude Include="_IConnection_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="_IException.h">

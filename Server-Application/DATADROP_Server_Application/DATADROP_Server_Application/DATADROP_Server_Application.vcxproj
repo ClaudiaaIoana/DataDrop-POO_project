@@ -128,9 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DB.cpp" />
-    <ClCompile Include="DB_log.cpp" />
     <ClCompile Include="ClientSocket.cpp" />
-    <ClCompile Include="DB_user.cpp" />
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Exception_Accepting_connection.cpp" />
     <ClCompile Include="Exception_connecting_db.cpp" />
@@ -145,9 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DB.h" />
-    <ClInclude Include="DB_log.h" />
     <ClInclude Include="ClientSocket.h" />
-    <ClInclude Include="DB_user.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Exception_Accepting_connection.h" />
     <ClInclude Include="Exception_connecting_db.h" />

@@ -5,9 +5,15 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 #include"Connection_manager.h"
+#include"DB.h"
 
 int main()
 {
+	DB* db = DB::get_instance();
 	Connection_manager* con = Connection_manager::get_instance();
 	con->listen_();
+
+	db->destroy_instance();
+
+	return 0;
 }

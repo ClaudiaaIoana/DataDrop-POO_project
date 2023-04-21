@@ -2,6 +2,7 @@
 #include <ws2tcpip.h>
 #include <thread>
 #include "Connection_manager.h"
+#include"DB.h"
 
 Connection_manager* Connection_manager::instance = nullptr;
 
@@ -35,12 +36,27 @@ void Connection_manager::destroy_instance()
 void Connection_manager::requests(SOCKET clientSocket)
 {
 	char buffer[1024] = "";
-	recv(clientSocket, buffer, sizeof(buffer), 0);
-	std::cout << "Request received" << std::endl;
-	login(buffer);
-	const char* message = "Corect";
-	int messageLength = strlen(message);
-	send(clientSocket, message, messageLength, 0);
+	if (recv(clientSocket, buffer, sizeof(buffer), 0))
+	{
+		char*				copy=(char*)calloc(strlen(buffer),sizeof(char));
+		strcpy(copy, buffer);
+		char*				identity = strtok(buffer, ":");
+		char				message[1024]="";
+		copy = copy + strlen(identity)+1;
+		std::cout << "Request received" << std::endl;
+		if (strcmp(identity,"LogIn")==0)
+		{
+			if (login(copy))
+				strcpy(message, "Corect");
+			else
+				strcpy(message, "Gresit");
+			//free(copy);
+		}
+
+		int messageLength = strlen(message);
+		send(clientSocket, message, messageLength, 0);
+	}
+	//TODO EXCEPTION
 }
 
 void Connection_manager::listen_()
@@ -66,24 +82,19 @@ void Connection_manager::listen_()
 
 bool Connection_manager::login(char* buffer)
 {
+	char*			 token = strtok(buffer, ":");
+	std::cout << "---------authentication---------\n";
+	std::string		username(token);
+	std::cout << "Username " << username << std::endl;
 
-	char*			token = strtok(buffer, ":");
-	std::string		 identity;
-	identity = token;
+	token = strtok(nullptr, ":");
+	std::string password(token);
 
-	if (identity == "LogIn")
+	std::cout << "Password " << password << std::endl;
+
+	if (DB::get_instance()->verify_account(username, password))
 	{
-		std::cout << "---------authentication---------\n";
-
-		token = strtok(nullptr, ":");
-		std::string username(token);
-		std::cout << "Username " << username << std::endl;
-
-		token = strtok(nullptr, ":");
-		std::string password(token);
-
-		std::cout << "Password " << password << std::endl;
 		return true;
-
 	}
+	return false;
 }

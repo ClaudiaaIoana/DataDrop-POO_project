@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <string>
 
 namespace Ui {
 class AppInterface;
@@ -22,6 +23,7 @@ public:
     void setChatZone(QPushButton *userButton);
     void setScrollArea(QScrollArea *scrollzone);
     void onButtonClicked();
+    void addFriend(QString username);
     ~AppInterface();
 private slots:
 

@@ -8,8 +8,7 @@ SignUp::SignUp(QWidget *parent) :
     ui(new Ui::SignUp)
 {
     ui->setupUi(this);
-    this->socket=new QTcpSocket();
-    _connect();
+    this->NetworkManager = new NetworkClient();
 }
 
 SignUp::~SignUp()
@@ -35,28 +34,6 @@ bool SignUp::_checkPassword(QString password, QString ConfirmPassword) const
         return true;
     return false;
 }
-
-void SignUp::_connect()
-{
-
-    socket->connectToHost("192.168.1.133",quint16(5555));
-    socket->open(QIODevice::ReadWrite);
-
-}
-
-void SignUp:: _sendToServer(QString message)
-{
-
-
-
-
-    if(!message.isEmpty())
-    {
-        socket->write(QString(message).toUtf8());
-        socket->waitForBytesWritten();
-    }
-}
-
 
 
 void SignUp::on_SignUpButton_clicked()
@@ -91,12 +68,25 @@ void SignUp::on_SignUpButton_clicked()
 
     if(empty == false and confirm == false and checked == false)
     {
+        QString message="Register:"+EmailText+":"+UsernameText+":"+PasswordText;
+
+        this->NetworkManager->connect();
+        this->NetworkManager->sendToServer(message);
+
         this->hide();
         MainWindow *gotoLog=new MainWindow();
         gotoLog->show();
     }
-    QString message="Register:"+EmailText+":"+UsernameText+":"+PasswordText;
-   _sendToServer(message);
+
+
+}
+
+
+void SignUp::on_BackButton_clicked()
+{
+    this->hide();
+    MainWindow *gotoLog=new MainWindow();
+    gotoLog->show();
 
 }
 

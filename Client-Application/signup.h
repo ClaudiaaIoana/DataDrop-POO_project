@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QTcpSocket>
 #include <QMainWindow>
+#include "networkclient.h"
+
 
 namespace Ui {
 class SignUp;
@@ -15,18 +17,18 @@ class SignUp :  public QDialog
 
 public:
      explicit SignUp(QWidget *parent = nullptr);
-    ~SignUp();
+
 
     bool _checkPassword(QString password, QString ConfirmPassword) const;
-
-    void _connect();
-    void _sendToServer(QString message);
-
+     ~SignUp();
 private slots:
 
     void on_SignUpButton_clicked();
 
+    void on_BackButton_clicked();
+
 private:
+    NetworkClient * NetworkManager;
     Ui::SignUp *ui;
     QTcpSocket *socket;
 };

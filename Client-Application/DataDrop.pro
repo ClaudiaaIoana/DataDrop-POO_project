@@ -16,6 +16,7 @@ SOURCES += \
     appinterface.cpp \
     main.cpp \
     mainwindow.cpp \
+    networkclient.cpp \
     signup.cpp \
     user.cpp
 
@@ -25,6 +26,7 @@ HEADERS += \
     addfriend.h \
     appinterface.h \
     mainwindow.h \
+    networkclient.h \
     signup.h \
     user.h
 

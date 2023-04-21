@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include "appinterface.h"
+#include "networkclient.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -9,9 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->m_clientSocket=new QTcpSocket(this);
-    _connectToServer();
-
+    this->NetworkManager=new NetworkClient();
 }
 
 MainWindow::~MainWindow()
@@ -19,46 +18,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-QString MainWindow::_receiveFromServer()
-{
-    m_clientSocket->waitForReadyRead();
-
-
-    QByteArray responseData = m_clientSocket->readAll();
-    QString response = QString::fromUtf8(responseData.constData(), responseData.length());
-
-    return response;
-}
-
-void MainWindow::_connectToServer()
-{
-    m_clientSocket->connectToHost("192.168.1.133",quint16(5555));
-    m_clientSocket->open(QIODevice::ReadWrite);
-    if(m_clientSocket->isOpen())
-    {
-       statusBar()->showMessage("Connected to server!");
-    }
-    else
-    {
-        statusBar()->showMessage("No connected to server!");
-    }
-}
-void MainWindow::_sendToServer(QString message)
-{
-
-    qint64 size = sizeof(message);
-
-    if(!message.isEmpty())
-    {
-        m_clientSocket->write(QString(message).toUtf8(),size);
-        m_clientSocket->waitForBytesWritten();
-    }
-}
 
 void MainWindow::on_ButtonLogIn_clicked()
 {
-    QString username=ui->UsernameLineEdit->text();
-    QString password=ui->PasswordLineEdit->text();
+   QString username=ui->UsernameLineEdit->text();
+   QString password=ui->PasswordLineEdit->text();
 
    if(username.isEmpty() or password.isEmpty())
    {
@@ -68,9 +32,9 @@ void MainWindow::on_ButtonLogIn_clicked()
    {
        QString message="LogIn:"+username+":"+password;
 
-       _sendToServer(message);
-
-       QString checkLogger=_receiveFromServer();
+       this->NetworkManager->connect();
+       this->NetworkManager->sendToServer(message);
+       QString checkLogger=this->NetworkManager->receiveFromServer();
 
        if(checkLogger=="Corect")
        {

@@ -14,14 +14,18 @@ AppInterface::AppInterface(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::AppInterface)
 {
-    this->user =new User("andreiungureanu133@yahoo.com","Andrei Ungureanu",
-                         {"Caprita Bogdan","Minulescu Daniel","Banica Alex"},
+    this->user =new User("andreiungureanu133@yahoo.com","Andrei",
+                         {"Bogdan132","Daniel_Minu123","Banica_Boss","GheScu","Mihaela","George","Emanuel","Tarcisiu","Claudia","Doraa"},
                          {"C112E","Moldovenii","Plutonul2"});
 
     ui->setupUi(this);
 
+    QString labelText="Salut, "+QString::fromStdString(user->_getUsername())+"!";
+
+    ui->labelText->setText(labelText);
     ui->Search->setPlaceholderText("  Search Friends...");
     ui->TextLineEdit->setPlaceholderText(" Type ");
+
     ui->sendButton->setVisible(false);
     ui->TextLineEdit->setVisible(false);
     ui->AttachButton->setVisible(false);
@@ -82,8 +86,9 @@ void AppInterface::setScrollZone()
 
     QList<QPushButton*> buttonList;
 
-    for (int i = 1; i <= 100; ++i) {
-            QPushButton *button = new QPushButton(QString("Utilizator %1").arg(i));
+    for (int i = 0; i < this->user->_getSizeFriendBuffer(); ++i) {
+            QString usernameIndexName=QString::fromStdString(user->_getUsernameIndex(i));
+            QPushButton *button = new QPushButton(usernameIndexName);
             QIcon icon(":/man_person.png"); // încărcați imaginea utilizatorului dintr-un fișier
             button->setIcon(icon);
             button->setIconSize(QSize(32, 32));
@@ -105,7 +110,35 @@ void AppInterface::setScrollZone()
                                   "QPushButton:pressed {"
                                       "background-color: rgba(0, 0, 0, 0.1);"
                                   "}");
-             buttonList.append(button);
+            button->setProperty("tipButon", "persoana");
+            buttonList.append(button);
+        }
+    for (int i = 0; i < this->user->_getSizeGroups(); ++i) {
+            QString GroupIndexName=QString::fromStdString(user->_getGroupIndex(i));
+            QPushButton *button = new QPushButton(GroupIndexName);
+            QIcon icon(":/teamwork.png");
+            button->setIcon(icon);
+            button->setIconSize(QSize(32, 32));
+            button->setStyleSheet("QPushButton {"
+                                      "border: none;"
+                                      "background-color: transparent;"
+                                      "color: #1E90FF;"
+                                      "padding: 8px 16px;"
+                                      "font-family: Arial, sans-serif;"
+                                      "font-size: 14px;"
+                                      "font-weight: bold;"
+                                      "text-align: left;"
+                                      "text-transform: none;"
+                                      "border-radius: 12px;"
+                                  "}"
+                                  "QPushButton:hover {"
+                                      "background-color: rgba(0, 0, 0, 0.05);"
+                                  "}"
+                                  "QPushButton:pressed {"
+                                      "background-color: rgba(0, 0, 0, 0.1);"
+                                  "}");
+            button->setProperty("tipButon", "grup");
+            buttonList.append(button);
         }
     this->FriendsList=buttonList;
     for (QPushButton *button : buttonList) {
@@ -136,12 +169,20 @@ void AppInterface::setChatZone(QPushButton *userButton)
     this->usernameLabel=new QLabel();
     this->usernameIcon=new QLabel();
 
+    if(userButton->property("tipButon").toString()=="persoana")
+    {
+
     QPixmap pixmap(":/man_person.png");
     QPixmap scaledPixmap = pixmap.scaled(32, 32, Qt::KeepAspectRatio);
     usernameIcon->setPixmap(scaledPixmap);
 
-
-
+    }
+    else if(userButton->property("tipButon").toString() == "grup")
+    {
+        QPixmap pixmap(":/teamwork.png");
+        QPixmap scaledPixmap = pixmap.scaled(32, 32, Qt::KeepAspectRatio);
+        usernameIcon->setPixmap(scaledPixmap);
+    }
     usernameLabel->setFixedSize(450, 40);
     usernameLabel->setStyleSheet("background-color: rgb(240, 240, 240);"
                                  "border: 2px solid rgb(211, 211, 211);"
@@ -160,6 +201,11 @@ void AppInterface::setChatZone(QPushButton *userButton)
     topBarArea->setAlignment(usernameIcon, Qt::AlignTop);
 
 }
+
+ void AppInterface::addFriend(QString username)
+ {
+     this->user->_addFriend(username);
+ }
 
 void AppInterface::onSearchEnterPressed()
 {
@@ -199,7 +245,8 @@ AppInterface::~AppInterface()
 
 void AppInterface::on_AddFriendButton_clicked()
 {
-      AddFriend *addFriendWindow =new AddFriend();
+      hide();
+      AddFriend *addFriendWindow =new AddFriend(user,this);
       addFriendWindow->show();
 }
 

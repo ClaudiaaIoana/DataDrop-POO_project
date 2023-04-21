@@ -23,7 +23,7 @@
    <string notr="true">background-color: rgb(220, 220, 220);</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="lineEdit">
+   <widget class="QLineEdit" name="lineUser">
     <property name="geometry">
      <rect>
       <x>140</x>

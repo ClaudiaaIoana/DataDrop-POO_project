@@ -38,6 +38,7 @@ void Connection_manager::acceptConnection()
 	clientSock = accept(server_socket, (SOCKADDR*)&clientAddr, &clientAddrSize);
 	if (clientSock != INVALID_SOCKET)
 	{
+		std::cout << "Client conected"<<std::endl;
 		conected_device_sockets.push_back(clientSock);
 	}
 	//TODO exceptions
@@ -45,6 +46,7 @@ void Connection_manager::acceptConnection()
 
 void Connection_manager::listen_()
 {
+	std::cout << "Listen for connections"<<std::endl;
 	while (true)
 	{
 		acceptConnection();
@@ -52,6 +54,10 @@ void Connection_manager::listen_()
 		{
 			char buffer[1024] = "";
 			recv(*sock, buffer, sizeof(buffer), 0);
+			login(buffer);
+			const char* message = "Corect";
+			int messageLength = strlen(message);
+			send(*sock, message, messageLength, 0);
 		}
 		for (auto sock = conected_users_sockets.begin(); sock != conected_users_sockets.end(); sock++)
 		{

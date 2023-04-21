@@ -24,7 +24,7 @@ public:
 	static Connection_manager* get_instance();
 	static void destroy_instance();
 	void listen_();
-	void acceptConnection();
+	void requests(SOCKET clientSocket);
 	bool login(char* buffer);
 };
 

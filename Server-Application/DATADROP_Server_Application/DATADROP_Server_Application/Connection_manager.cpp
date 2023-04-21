@@ -1,4 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
+#include <ws2tcpip.h>
+#include <thread>
 #include "Connection_manager.h"
 
 Connection_manager* Connection_manager::instance = nullptr;
@@ -30,40 +32,35 @@ void Connection_manager::destroy_instance()
 		delete instance;
 }
 
-void Connection_manager::acceptConnection()
+void Connection_manager::requests(SOCKET clientSocket)
 {
-	SOCKET				clientSock;
-	SOCKADDR_IN			clientAddr;
-	int					clientAddrSize = sizeof(clientAddr);
-	clientSock = accept(server_socket, (SOCKADDR*)&clientAddr, &clientAddrSize);
-	if (clientSock != INVALID_SOCKET)
-	{
-		std::cout << "Client conected"<<std::endl;
-		conected_device_sockets.push_back(clientSock);
-	}
-	//TODO exceptions
+	char buffer[1024] = "";
+	recv(clientSocket, buffer, sizeof(buffer), 0);
+	std::cout << "Request received" << std::endl;
+	login(buffer);
+	const char* message = "Corect";
+	int messageLength = strlen(message);
+	send(clientSocket, message, messageLength, 0);
 }
 
 void Connection_manager::listen_()
 {
-	std::cout << "Listen for connections"<<std::endl;
+	SOCKET				clientSock;
+	SOCKADDR_IN			clientAddr;
+	int					clientAddrSize = sizeof(clientAddr);
+	std::cout << "Listening for connections and requests" << std::endl;
 	while (true)
 	{
-		acceptConnection();
-		for (auto sock = conected_device_sockets.begin(); sock != conected_device_sockets.end(); sock++)
+		clientSock = accept(server_socket, (SOCKADDR*)&clientAddr, &clientAddrSize);
+		if (clientSock != INVALID_SOCKET)
 		{
-			char buffer[1024] = "";
-			recv(*sock, buffer, sizeof(buffer), 0);
-			login(buffer);
-			const char* message = "Corect";
-			int messageLength = strlen(message);
-			send(*sock, message, messageLength, 0);
-		}
-		for (auto sock = conected_users_sockets.begin(); sock != conected_users_sockets.end(); sock++)
-		{
-
+			std::cout << "Client conected" << std::endl;
+			conected_device_sockets.push_back(clientSock);
+			std::thread requestThread(&Connection_manager::requests,this, clientSock);
+			requestThread.detach();
 		}
 	}
+	//TODO exceptions
 }
 
 

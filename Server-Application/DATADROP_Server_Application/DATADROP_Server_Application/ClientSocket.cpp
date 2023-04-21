@@ -13,12 +13,12 @@ std::string ClientSocket::getUsername()
     return std::string();
 }
 
-ClientSocket ClientSocket::operator==(std::string client_username)
-{
-   // return ClientSocket();
-}
-
-ClientSocket ClientSocket::operator==(SOCKET socket)
-{
-    //return ClientSocket();
-}
+//ClientSocket ClientSocket::operator==(std::string client_username)
+//{
+//   // return ClientSocket();
+//}
+//
+//ClientSocket ClientSocket::operator==(SOCKET socket)
+//{
+//    //return ClientSocket();
+//}

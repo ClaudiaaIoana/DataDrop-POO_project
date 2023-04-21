@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
+#include "appinterface.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -8,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->m_clientSocket=new QTcpSocket(this);
+    _connectToServer();
 
 }
 
@@ -29,7 +32,7 @@ QString MainWindow::_receiveFromServer()
 
 void MainWindow::_connectToServer()
 {
-    m_clientSocket->connectToHost("192.168.1.131",quint16(5555));
+    m_clientSocket->connectToHost("192.168.1.133",quint16(5555));
     m_clientSocket->open(QIODevice::ReadWrite);
     if(m_clientSocket->isOpen())
     {
@@ -42,7 +45,6 @@ void MainWindow::_connectToServer()
 }
 void MainWindow::_sendToServer(QString message)
 {
-    _connectToServer();
 
     qint64 size = sizeof(message);
 
@@ -73,10 +75,12 @@ void MainWindow::on_ButtonLogIn_clicked()
        if(checkLogger=="Corect")
        {
             hide();
+            AppInterface *app=new AppInterface();
+            app->show();
        }
        else
        {
-             QMessageBox::warning(this,"Warning","!");
+             QMessageBox::warning(this,"Warning","Username or Password is incorrect");
              ui->UsernameLineEdit->setText("");
              ui->PasswordLineEdit->setText("");
        }

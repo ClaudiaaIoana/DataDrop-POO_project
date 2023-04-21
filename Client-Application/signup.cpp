@@ -9,6 +9,7 @@ SignUp::SignUp(QWidget *parent) :
 {
     ui->setupUi(this);
     this->socket=new QTcpSocket();
+    _connect();
 }
 
 SignUp::~SignUp()
@@ -38,14 +39,14 @@ bool SignUp::_checkPassword(QString password, QString ConfirmPassword) const
 void SignUp::_connect()
 {
 
-    socket->connectToHost("192.168.1.131",quint16(5555));
+    socket->connectToHost("192.168.1.133",quint16(5555));
     socket->open(QIODevice::ReadWrite);
 
 }
 
 void SignUp:: _sendToServer(QString message)
 {
-    _connect();
+
 
 
 

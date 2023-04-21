@@ -9,5 +9,5 @@
 int main()
 {
 	Connection_manager* con = Connection_manager::get_instance();
-
+	con->listen_();
 }

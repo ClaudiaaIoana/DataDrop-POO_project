@@ -24,12 +24,15 @@ void NetworkClient::connect(const QString &host, quint16 port)
     if (socket->state() != QAbstractSocket::ConnectedState)
        {
            socket->connectToHost(host, port);
-           if (!socket->waitForConnected(5000))
-           {
-               qDebug() << "Error: " << socket->errorString();
-           }
+           if (socket->waitForConnected(5000))
+                   {
+                       qDebug() << "Connected to" << host << "on port" << port;
+                   }
+                   else
+                   {
+                       qDebug() << "Error: " << socket->errorString();
+                   }
        }
-    //socket->open(QIODevice::ReadWrite);
 }
 
 

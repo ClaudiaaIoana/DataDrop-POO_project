@@ -36,26 +36,31 @@ void Connection_manager::destroy_instance()
 void Connection_manager::requests(SOCKET clientSocket)
 {
 	char buffer[1024] = "";
-	if (recv(clientSocket, buffer, sizeof(buffer), 0))
+	while (true)
 	{
-		char*				copy=(char*)calloc(strlen(buffer),sizeof(char));
-		strcpy(copy, buffer);
-		char*				identity = strtok(buffer, ":");
-		char				message[1024]="";
-		copy = copy + strlen(identity)+1;
-		std::cout << "Request received" << std::endl;
-		if (strcmp(identity,"LogIn")==0)
+		if (recv(clientSocket, buffer, sizeof(buffer), 0))
 		{
-			if (login(copy))
-				strcpy(message, "Corect");
-			else
-				strcpy(message, "Gresit");
-			//free(copy);
-		}
+			char* copy = (char*)calloc(strlen(buffer), sizeof(char));
+			strcpy(copy, buffer);
+			char* identity = strtok(buffer, ":");
+			char				message[1024] = "";
+			copy = copy + strlen(identity) + 1;
+			std::cout << "Request received" << std::endl;
+			if (strcmp(identity, "LogIn") == 0)
+			{
+				if (login(copy))
+					strcpy(message, "Corect");
+				else
+					strcpy(message, "Gresit");
+				//free(copy);
+			}
 
-		int messageLength = strlen(message);
-		send(clientSocket, message, messageLength, 0);
+			int messageLength = strlen(message);
+			send(clientSocket, message, messageLength, 0);
+		}
+		else break;
 	}
+	closesocket(clientSocket);
 	//TODO EXCEPTION
 }
 

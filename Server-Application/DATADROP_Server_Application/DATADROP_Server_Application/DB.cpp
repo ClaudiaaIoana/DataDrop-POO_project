@@ -71,32 +71,98 @@ void DB::destroy_instance()
         delete instance;
 }
 
+//bool DB::verify_account(std::string username, std::string password)
+//{
+//    bool            valid = false;
+//    SQLRETURN       retcode;
+//
+//    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"SELECT * FROM Users WHERE UserName = ? AND Password = ?", SQL_NTS);
+//    if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
+//        SQLWCHAR SqlState[6], Msg[SQL_MAX_MESSAGE_LENGTH];
+//        SQLINTEGER NativeError;
+//        SQLSMALLINT i, MsgLen;
+//
+//        i = 1;
+//        while (SQLGetDiagRec(SQL_HANDLE_STMT, hstmt, i, SqlState, &NativeError, Msg, sizeof(Msg), &MsgLen) == SQL_SUCCESS) {
+//            std::cout << "SQLState: " << SqlState << std::endl;
+//            std::cout << "NativeError: " << NativeError << std::endl;
+//            std::cout << "Message: " << Msg << std::endl;
+//            i++;
+//        }
+//    }
+//
+//
+//    // Bind the parameters to the variables
+//    retcode=SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
+//    retcode=SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, password.length(), 0, (SQLPOINTER)password.c_str(), password.length(), NULL);
+//    retcode = SQLExecute(hstmt);
+//
+//    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) 
+//    {
+//        if(SQLFetch(hstmt) == SQL_SUCCESS) 
+//        {
+//            valid = true;
+//        }
+//    }
+//    else {
+//        //TODO EXCEPTION
+//    }
+//
+//    // Reset the statement for the next uses
+//    SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
+//    SQLFreeStmt(hstmt, SQL_UNBIND);
+//
+//    return valid;
+//}
+
 bool DB::verify_account(std::string username, std::string password)
 {
-    bool            valid = false;
-    SQLRETURN       retcode;
+    bool valid = false;
+    SQLRETURN retcode;
 
+    // Free the existing statement handle
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    hstmt = SQL_NULL_HSTMT;
+
+    // Allocate a new statement handle
+    retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        return false;
+    }
+
+    // Prepare SQL statement
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"SELECT * FROM Users WHERE UserName = ? AND Password = ?", SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        return false;
+    }
 
-    // Bind the parameters to the variables
-    retcode=SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
-    retcode=SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, password.length(), 0, (SQLPOINTER)password.c_str(), password.length(), NULL);
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        return false;
+    }
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, password.length(), 0, (SQLPOINTER)password.c_str(), password.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        return false;
+    }
+
+    // Execute the statement
     retcode = SQLExecute(hstmt);
-
-    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) 
-    {
-        if(SQLFetch(hstmt) == SQL_SUCCESS) 
-        {
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        if (SQLFetch(hstmt) == SQL_SUCCESS) {
             valid = true;
         }
     }
     else {
-        //TODO EXCEPTION
+        //TODO: Handle error
+        return false;
     }
-
-    // Reset the statement for the next uses
-    SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-    SQLFreeStmt(hstmt, SQL_UNBIND);
 
     return valid;
 }
+
+

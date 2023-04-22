@@ -26,5 +26,6 @@ public:
 	void listen_();
 	void requests(SOCKET clientSocket);
 	bool login(char* buffer);
+	void register_(char* buffer);
 };
 

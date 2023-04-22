@@ -12,7 +12,7 @@ public:
 	ClientSocket(std::string username, SOCKET socket);
 	~ClientSocket();
 	std::string		getUsername();
-	ClientSocket	operator==(std::string client_username);
-	ClientSocket	operator==(SOCKET socket);
+	friend bool	operator==(ClientSocket& sock,std::string client_username);
+	friend bool	operator==(ClientSocket& sock, SOCKET client_socket);
 };
 

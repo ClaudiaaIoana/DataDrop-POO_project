@@ -3,6 +3,7 @@
 #include <thread>
 #include "Connection_manager.h"
 #include"DB.h"
+#include"ClientSocket.h"
 
 Connection_manager* Connection_manager::instance = nullptr;
 
@@ -40,6 +41,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 	while (running)
 	{
 		char buffer[1024] = "";
+		int messageLength;
 		if (recv(clientSocket, buffer, sizeof(buffer), 0))
 		{
 			char* copy = (char*)calloc(strlen(buffer), sizeof(char));
@@ -50,28 +52,66 @@ void Connection_manager::requests(SOCKET clientSocket)
 
 			std::cout << "Request received" << std::endl;
 
+
+			//LOGIN
 			if (strcmp(identity, "LogIn") == 0)
 			{
-				if (login(copy))
+				std::string		username;
+				username = login(copy);
+				if (!username.empty())
 					strcpy(message, "Corect");
 				else
 					strcpy(message, "Gresit");
-				//free(copy);
+
+				messageLength = strlen(message);
+				send(clientSocket, message, messageLength, 0);
+
+				if (strcmp(message,"Corect")==0)
+				{
+					std::string			list = this->give_friend_list(username);
+					strcpy(message,list.data());
+					messageLength = strlen(message);
+					send(clientSocket, message, messageLength, 0);
+					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
+					conected_users_sockets.push_back(ClientSocket(username, clientSocket));
+				}
+				
 			}
+
+			//REGISTER
 			else if (strcmp(identity, "Register") == 0)
 			{
 				register_(copy);
 			}
 
-			int messageLength = strlen(message);
-			send(clientSocket, message, messageLength, 0);
+			//ADD FRIEND
+			else if (strcmp(identity, "AddFriend") == 0)
+			{
+				if (add_friend(copy))
+				{
+					strcpy(message, "Adaugat");
+				}
+				else
+				{
+					strcpy(message, "Respins");
+				}
+				messageLength = strlen(message);
+				send(clientSocket, message, messageLength, 0);
+			}
+
+			buffer[0] = '\0';
+
 		}
+		//erasing the socket from memory
 		else
 		{
 			running = false;
-			conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
+			if(std::find(this->conected_device_sockets.begin(),this->conected_device_sockets.end(), clientSocket)!=this->conected_device_sockets.end())
+					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
+			auto it = std::find(this->conected_users_sockets.begin(), this->conected_users_sockets.end(), clientSocket);
+			if(it!=this->conected_users_sockets.end())
+					conected_users_sockets.erase(std::remove(conected_users_sockets.begin(), conected_users_sockets.end(), clientSocket), conected_users_sockets.end());
 		}
-		strcpy(buffer, "");
 	}
 	closesocket(clientSocket);
 	//TODO EXCEPTION
@@ -98,7 +138,7 @@ void Connection_manager::listen_()
 }
 
 
-bool Connection_manager::login(char* buffer)
+std::string Connection_manager::login(char* buffer)
 {
 	char*			 token = strtok(buffer, ":");
 	std::cout << "---------authentication---------\n";
@@ -112,9 +152,21 @@ bool Connection_manager::login(char* buffer)
 
 	if (DB::get_instance()->verify_account(username, password))
 	{
-		return true;
+		return username;
 	}
-	return false;
+	return std::string();
+}
+
+std::string Connection_manager::give_friend_list(std::string username)
+{
+	std::string					friend_list_packet;
+	std::vector<std::string>	friend_list;
+	friend_list = DB::get_instance()->get_friend_list(username);
+	for (auto friend_ = friend_list.begin(); friend_ != friend_list.end(); friend_++ , friend_list_packet+=":")
+	{
+		friend_list_packet += *friend_;
+	}
+	return friend_list_packet;
 }
 
 void Connection_manager::register_(char* buffer)
@@ -137,4 +189,23 @@ void Connection_manager::register_(char* buffer)
 
 
 	DB::get_instance()->add_account(username, email, password);
+}
+
+bool Connection_manager::add_friend(char* buffer)
+{
+	char* token = strtok(buffer, ":");
+	std::string			user1(token);
+	token = strtok(nullptr, ":");
+	std::string			user2(token);
+
+	std::cout << "---------add friend---------\n";
+
+	std::cout << "User1: " << user1 << std::endl;
+	std::cout << "User2 " << user2 << std::endl;
+
+	if (DB::get_instance()->add_friend(user1, user2))
+	{
+		return true;
+	}
+	return false;
 }

@@ -9,7 +9,7 @@ AddFriend::AddFriend(User *user,AppInterface *app,QWidget *parent) :
     this->appInterface=app;
     this->myUser=user;
     ui->lineUser->setPlaceholderText("  Type...");
-    this->ManagerNetwork=new NetworkClient();
+   // this->ManagerNetwork=new NetworkClient();
 }
 
 AddFriend::~AddFriend()
@@ -23,15 +23,15 @@ void AddFriend::on_AddButton_clicked()
     QString myUsername=QString::fromStdString(myUser->_getUsername());
     QString message="AddFriend:"+myUsername+":"+username;
 
-    this->ManagerNetwork->connect();
-    this->ManagerNetwork->sendToServer(message);
+   // this->ManagerNetwork->connect();
+    //this->ManagerNetwork->sendToServer(message);
 
-    QString response=this->ManagerNetwork->receiveFromServer();
-    if(response== "Adaugat")
-    {
-        hide();
-        this->appInterface->addFriend(username);
-        appInterface->show();
-    }
+   // QString response=this->ManagerNetwork->receiveFromServer();
+    //if(response== "Adaugat")
+    //{
+     //   hide();
+       // this->appInterface->addFriend(username);
+        //appInterface->show();
+    //}
 }
 

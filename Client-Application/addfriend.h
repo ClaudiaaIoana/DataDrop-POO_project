@@ -24,7 +24,7 @@ private slots:
 
 private:
     AppInterface *appInterface;
-    NetworkClient *ManagerNetwork;
+   // NetworkClient *ManagerNetwork;
     Ui::AddFriend *ui;
     User *myUser;
 };

@@ -8,7 +8,7 @@ SignUp::SignUp(QWidget *parent) :
     ui(new Ui::SignUp)
 {
     ui->setupUi(this);
-    this->NetworkManager = new NetworkClient();
+   // this->NetworkManager = new NetworkClient();
 }
 
 SignUp::~SignUp()
@@ -70,8 +70,12 @@ void SignUp::on_SignUpButton_clicked()
     {
         QString message="Register:"+EmailText+":"+UsernameText+":"+PasswordText;
 
-        this->NetworkManager->connect();
-        this->NetworkManager->sendToServer(message);
+<<<<<<< Updated upstream
+        //this->NetworkManager->connect();
+=======
+       // this->NetworkManager->connect();
+>>>>>>> Stashed changes
+        //this->NetworkManager->sendToServer(message);
 
         this->hide();
         MainWindow *gotoLog=new MainWindow();

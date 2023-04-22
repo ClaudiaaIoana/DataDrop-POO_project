@@ -35,10 +35,11 @@ void Connection_manager::destroy_instance()
 
 void Connection_manager::requests(SOCKET clientSocket)
 {
-	char buffer[1024] = "";
+	
 	bool running = true;
 	while (running)
 	{
+		char buffer[1024] = "";
 		if (recv(clientSocket, buffer, sizeof(buffer), 0))
 		{
 			char* copy = (char*)calloc(strlen(buffer), sizeof(char));
@@ -59,7 +60,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 			}
 			else if (strcmp(identity, "Register") == 0)
 			{
-
+				register_(copy);
 			}
 
 			int messageLength = strlen(message);
@@ -70,6 +71,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 			running = false;
 			conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
 		}
+		strcpy(buffer, "");
 	}
 	closesocket(clientSocket);
 	//TODO EXCEPTION
@@ -113,4 +115,26 @@ bool Connection_manager::login(char* buffer)
 		return true;
 	}
 	return false;
+}
+
+void Connection_manager::register_(char* buffer)
+{
+
+	char*				token = strtok(buffer, ":");
+	std::string			email(token);
+
+	std::cout << "---------register---------\n";
+
+	std::cout << "Email " << email << std::endl;
+
+	token = strtok(nullptr, ":");
+	std::string username(token);
+	std::cout << "Username " << username << std::endl;
+
+	token = strtok(nullptr, ":");
+	std::string password(token);
+	std::cout << "Password " << password << std::endl;
+
+
+	DB::get_instance()->add_account(username, email, password);
 }

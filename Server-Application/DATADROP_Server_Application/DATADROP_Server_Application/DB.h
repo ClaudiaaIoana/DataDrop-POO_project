@@ -22,5 +22,6 @@ public:
 	static DB*		get_instance();
 	static void		destroy_instance();
 	bool verify_account(std::string username, std::string password);
+	void add_account(std::string username, std::string email, std::string password);
 };
 

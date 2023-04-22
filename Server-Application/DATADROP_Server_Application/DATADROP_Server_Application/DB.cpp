@@ -165,4 +165,56 @@ bool DB::verify_account(std::string username, std::string password)
     return valid;
 }
 
+void DB::add_account(std::string username, std::string email, std::string password)
+{
+    SQLRETURN retcode;
+
+    // Free the existing statement handle
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    hstmt = SQL_NULL_HSTMT;
+
+    // Allocate a new statement handle
+    retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        
+    }
+
+    // Prepare SQL statement
+    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO Users VALUES ( ? , ? , ? )", SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        
+    }
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, password.length(), 0, (SQLPOINTER)password.c_str(), password.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, email.length(), 0, (SQLPOINTER)email.c_str(), email.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+        
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        if (SQLFetch(hstmt) == SQL_SUCCESS) {
+            std::cout << "ACCOUNT CREATED WITH SUCCES" << std::endl;
+        }
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR AT CREATEING CODE, POSSIBLE EXISTING"<<std::endl;
+    }
+}
+
 

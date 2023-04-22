@@ -160,12 +160,14 @@ std::string Connection_manager::login(char* buffer)
 std::string Connection_manager::give_friend_list(std::string username)
 {
 	std::string					friend_list_packet;
+
 	std::vector<std::string>	friend_list;
 	friend_list = DB::get_instance()->get_friend_list(username);
 	for (auto friend_ = friend_list.begin(); friend_ != friend_list.end(); friend_++ , friend_list_packet+=":")
 	{
 		friend_list_packet += *friend_;
 	}
+	friend_list_packet.pop_back();
 	return friend_list_packet;
 }
 

@@ -36,7 +36,8 @@ void Connection_manager::destroy_instance()
 void Connection_manager::requests(SOCKET clientSocket)
 {
 	char buffer[1024] = "";
-	while (true)
+	bool running = true;
+	while (running)
 	{
 		if (recv(clientSocket, buffer, sizeof(buffer), 0))
 		{
@@ -58,7 +59,11 @@ void Connection_manager::requests(SOCKET clientSocket)
 			int messageLength = strlen(message);
 			send(clientSocket, message, messageLength, 0);
 		}
-		else break;
+		else
+		{
+			running = false;
+			conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
+		}
 	}
 	closesocket(clientSocket);
 	//TODO EXCEPTION

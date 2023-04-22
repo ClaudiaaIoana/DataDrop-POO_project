@@ -1,3 +1,4 @@
+
 #include "signup.h"
 #include "ui_signup.h"
 #include <QMessageBox>
@@ -70,11 +71,7 @@ void SignUp::on_SignUpButton_clicked()
     {
         QString message="Register:"+EmailText+":"+UsernameText+":"+PasswordText;
 
-<<<<<<< Updated upstream
         //this->NetworkManager->connect();
-=======
-       // this->NetworkManager->connect();
->>>>>>> Stashed changes
         //this->NetworkManager->sendToServer(message);
 
         this->hide();

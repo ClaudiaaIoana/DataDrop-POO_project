@@ -10,7 +10,7 @@ NetworkClient::NetworkClient()
 
 void NetworkClient::connect()
 {
-    socket->connectToHost("172.16.33.77",quint16(5555));
+    socket->connectToHost("172.16.33.91",quint16(5555));
     socket->open(QIODevice::ReadWrite);
 }
 

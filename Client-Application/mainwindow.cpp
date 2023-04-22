@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->NetworkManager=new NetworkClient();
+    this->NetworkManager->connect();
 }
 
 MainWindow::~MainWindow()
@@ -32,7 +33,7 @@ void MainWindow::on_ButtonLogIn_clicked()
    {
        QString message="LogIn:"+username+":"+password;
 
-       this->NetworkManager->connect();
+      // this->NetworkManager->connect();
        this->NetworkManager->sendToServer(message);
        QString checkLogger=this->NetworkManager->receiveFromServer();
 

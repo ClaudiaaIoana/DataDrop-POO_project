@@ -14,7 +14,7 @@ public:
     static NetworkClient* getInstance();
     void connect(const QString& host, quint16 port);
     void sendToServer(const QString message);
-
+    void sendFile(const QString &filePath);
     QString receiveFromServer();
 };
 

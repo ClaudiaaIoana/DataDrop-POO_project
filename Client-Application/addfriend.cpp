@@ -1,5 +1,7 @@
 #include "addfriend.h"
 #include "ui_addfriend.h"
+#include <QMessageBox>
+
 
 AddFriend::AddFriend(User *user,AppInterface *app,QWidget *parent) :
     QMainWindow(parent),
@@ -9,7 +11,7 @@ AddFriend::AddFriend(User *user,AppInterface *app,QWidget *parent) :
     this->appInterface=app;
     this->myUser=user;
     ui->lineUser->setPlaceholderText("  Type...");
-   // this->ManagerNetwork=new NetworkClient();
+    this->ManagerNetwork=NetworkClient::getInstance();
 }
 
 AddFriend::~AddFriend()
@@ -23,15 +25,20 @@ void AddFriend::on_AddButton_clicked()
     QString myUsername=QString::fromStdString(myUser->_getUsername());
     QString message="AddFriend:"+myUsername+":"+username;
 
-   // this->ManagerNetwork->connect();
-    //this->ManagerNetwork->sendToServer(message);
+    this->ManagerNetwork->sendToServer(message);
 
-   // QString response=this->ManagerNetwork->receiveFromServer();
-    //if(response== "Adaugat")
-    //{
-     //   hide();
-       // this->appInterface->addFriend(username);
-        //appInterface->show();
-    //}
+    QString response=this->ManagerNetwork->receiveFromServer();
+    if(response== "Adaugat")
+    {
+    hide();
+    this->myUser->_addFriend(username);
+    AppInterface *newApp=new AppInterface(myUser);
+    newApp->show();
+    }
+    if(response == "Respins")
+    {
+         QMessageBox::warning(this,"Warning","The field is empty!");
+         ui->lineUser->setText("");
+    }
 }
 

@@ -71,53 +71,8 @@ void DB::destroy_instance()
         delete instance;
 }
 
-//bool DB::verify_account(std::string username, std::string password)
-//{
-//    bool            valid = false;
-//    SQLRETURN       retcode;
-//
-//    retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"SELECT * FROM Users WHERE UserName = ? AND Password = ?", SQL_NTS);
-//    if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
-//        SQLWCHAR SqlState[6], Msg[SQL_MAX_MESSAGE_LENGTH];
-//        SQLINTEGER NativeError;
-//        SQLSMALLINT i, MsgLen;
-//
-//        i = 1;
-//        while (SQLGetDiagRec(SQL_HANDLE_STMT, hstmt, i, SqlState, &NativeError, Msg, sizeof(Msg), &MsgLen) == SQL_SUCCESS) {
-//            std::cout << "SQLState: " << SqlState << std::endl;
-//            std::cout << "NativeError: " << NativeError << std::endl;
-//            std::cout << "Message: " << Msg << std::endl;
-//            i++;
-//        }
-//    }
-//
-//
-//    // Bind the parameters to the variables
-//    retcode=SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
-//    retcode=SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, password.length(), 0, (SQLPOINTER)password.c_str(), password.length(), NULL);
-//    retcode = SQLExecute(hstmt);
-//
-//    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) 
-//    {
-//        if(SQLFetch(hstmt) == SQL_SUCCESS) 
-//        {
-//            valid = true;
-//        }
-//    }
-//    else {
-//        //TODO EXCEPTION
-//    }
-//
-//    // Reset the statement for the next uses
-//    SQLFreeStmt(hstmt, SQL_RESET_PARAMS);
-//    SQLFreeStmt(hstmt, SQL_UNBIND);
-//
-//    return valid;
-//}
-
-bool DB::verify_account(std::string username, std::string password)
+void DB::resetHanddle()
 {
-    bool valid = false;
     SQLRETURN retcode;
 
     // Free the existing statement handle
@@ -128,8 +83,16 @@ bool DB::verify_account(std::string username, std::string password)
     retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
-        return false;
+       
     }
+}
+
+bool DB::verify_account(std::string username, std::string password)
+{
+    bool valid = false;
+    SQLRETURN retcode;
+
+    resetHanddle();
 
     // Prepare SQL statement
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"SELECT * FROM Users WHERE UserName = ? AND Password = ?", SQL_NTS);
@@ -169,16 +132,7 @@ void DB::add_account(std::string username, std::string email, std::string passwo
 {
     SQLRETURN retcode;
 
-    // Free the existing statement handle
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    hstmt = SQL_NULL_HSTMT;
-
-    // Allocate a new statement handle
-    retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-    if (!SQL_SUCCEEDED(retcode)) {
-        //TODO: Handle error
-        
-    }
+    resetHanddle();
 
     // Prepare SQL statement
     retcode = SQLPrepare(hstmt, (SQLWCHAR*)L"INSERT INTO Users VALUES ( ? , ? , ? )", SQL_NTS);
@@ -213,8 +167,95 @@ void DB::add_account(std::string username, std::string email, std::string passwo
     }
     else {
         //TODO: Handle error
-        std::cout << "ERROR AT CREATEING CODE, POSSIBLE EXISTING"<<std::endl;
+        std::cout << "ERROR AT CREATING CODE, POSSIBLE EXISTING"<<std::endl;
     }
+}
+
+bool DB::add_friend(std::string user1, std::string user2)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"INSERT INTO Friendships VALUES ((SELECT UserID FROM Users WHERE UserName = ? ),(SELECT UserID FROM Users WHERE UserName = ? ))";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, user1.length(), 0, (SQLPOINTER)user1.c_str(), user1.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, user2.length(), 0, (SQLPOINTER)user2.c_str(), user2.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) 
+    {
+        std::cout << "FRIENDSHIP CREATED" << std::endl;
+        return true;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR, POSSIBLE WORNG USERNAME" << std::endl;
+    }
+
+    return false;
+}
+
+std::vector<std::string> DB::get_friend_list(std::string username)
+{
+    std::vector<std::string>        usernames;
+    SQLRETURN                       retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"EXEC FriendsList ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+
+        SQLCHAR sqlUsername[SQL_RESULT_LEN];
+        SQLLEN ptrSqlUsername;
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            SQLGetData(hstmt, 1, SQL_CHAR, sqlUsername, SQL_RESULT_LEN, &ptrSqlUsername);
+            usernames.push_back((char*)sqlUsername);
+        }
+
+           std::cout << "FRIEND LIST EXTRACTED" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+
+    return usernames;
 }
 
 

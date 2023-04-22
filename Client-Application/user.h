@@ -10,6 +10,7 @@ private:
 public:
     User();
     User(string Email,string Username,vector <string> UsernameFriends,vector <string> GroupName);
+    User(string Username);
 };
 
 #endif // USER_H

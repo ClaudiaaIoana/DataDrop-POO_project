@@ -14,6 +14,7 @@ protected:
 public:
     Abstract_User();
     Abstract_User(string Email,string Username, vector <string> UserFriends,vector <string> GroupName);
+    Abstract_User(string username);
     //get-ere
     string _getUsername()const;
     int _getSizeFriendBuffer()const;

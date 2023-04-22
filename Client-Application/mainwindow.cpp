@@ -3,7 +3,9 @@
 #include <QMessageBox>
 #include "appinterface.h"
 #include "networkclient.h"
-
+#include <QStringView>
+#include <QStringTokenizer>
+#include <QtCore>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -38,7 +40,15 @@ void MainWindow::on_ButtonLogIn_clicked()
        if(checkLogger=="Corect")
        {
             hide();
-            AppInterface *app=new AppInterface();
+            User *user = new User(username.toStdString());
+            QString friendList = this->NetworkManager->receiveFromServer();
+            QStringList tokens = friendList.split(':');
+
+            for (const auto& token : tokens) {
+                user->_addFriend(QString::fromStdString(token.toStdString()));
+            }
+
+            AppInterface *app=new AppInterface(user);
             app->show();
        }
        else

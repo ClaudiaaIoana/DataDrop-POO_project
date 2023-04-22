@@ -10,16 +10,23 @@
 #include <QScrollBar>
 #include <QFileDialog>
 
-AppInterface::AppInterface(QWidget *parent):
+AppInterface::AppInterface(User *user,QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::AppInterface)
 {
-    this->user =new User("andreiungureanu133@yahoo.com","Andrei",
-                         {"Bogdan132","Daniel_Minu123","Banica_Boss","GheScu","Mihaela","George","Emanuel","Tarcisiu","Claudia","Doraa"},
-                         {"C112E","Moldovenii","Plutonul2"});
-
     ui->setupUi(this);
 
+    this->user=user;
+    this->ManagerNetwork=NetworkClient::getInstance();
+
+    setInterface();
+
+
+}
+
+
+void AppInterface::setInterface()
+{
     QString labelText="Salut, "+QString::fromStdString(user->_getUsername())+"!";
 
     ui->labelText->setText(labelText);
@@ -40,9 +47,8 @@ AppInterface::AppInterface(QWidget *parent):
 
     for (QPushButton *button : FriendsList)
     {
-            connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClicked);     
+            connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClicked);
     }
-
 }
 
 void AppInterface::setScrollArea(QScrollArea *scrollzone)
@@ -233,8 +239,6 @@ void AppInterface::onButtonClicked()
     QPushButton *button = qobject_cast<QPushButton *>(sender());
     setChatZone(button);
 
-
-
 }
 
 AppInterface::~AppInterface()
@@ -245,9 +249,9 @@ AppInterface::~AppInterface()
 
 void AppInterface::on_AddFriendButton_clicked()
 {
-      hide();
-      AddFriend *addFriendWindow =new AddFriend(user,this);
-      addFriendWindow->show();
+    hide();
+    AddFriend *addFriendWindow =new AddFriend(user,this);
+    addFriendWindow->show();
 }
 
 
@@ -262,7 +266,8 @@ void AppInterface::on_AttachButton_clicked()
     QString file_path = QFileDialog::getOpenFileName(this, "Selectați un fișier", "", "Toate fișierele (*.*)");
     if (!file_path.isEmpty())
     {
-         ui->TextLineEdit->setText(file_path);
+         //ui->TextLineEdit->setText(file_path);
+        this->ManagerNetwork->sendFile(file_path);
     }
 }
 

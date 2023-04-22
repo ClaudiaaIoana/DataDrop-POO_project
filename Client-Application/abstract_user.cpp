@@ -12,6 +12,11 @@ Abstract_User::Abstract_User(string Email,string Username, vector <string> UserF
 
 }
 
+Abstract_User::Abstract_User(string username):
+    Username(username)
+{
+}
+
 string Abstract_User::_getUsername()const
 {
     return this->Username;

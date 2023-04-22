@@ -1,5 +1,8 @@
 #include "networkclient.h"
 #include <qdebug.h>
+#include <QFile>
+#include <QFileInfo>
+
 
 NetworkClient* NetworkClient::instance = nullptr;
 
@@ -35,6 +38,27 @@ void NetworkClient::connect(const QString &host, quint16 port)
        }
 }
 
+void NetworkClient::sendFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "Could not open file " << filePath;
+        return;
+    }
+
+    QFileInfo fileInfo(file);
+    QString fileName(fileInfo.fileName());
+    QByteArray fileData = file.readAll();
+    qint64 fileSize = file.size();
+
+    QByteArray byteArray;
+    QDataStream stream(&byteArray, QIODevice::WriteOnly);
+    stream << fileName << fileSize << fileData;
+
+    if (socket->write(byteArray) == -1) {
+        qDebug() << "Error writing to socket: " << socket->errorString();
+    }
+}
 
 void NetworkClient::sendToServer(const QString message)
 {

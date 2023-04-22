@@ -1,5 +1,16 @@
 #include "networkclient.h"
 
+NetworkClient*NetworkClient::instance=nullptr;
+
+
+NetworkClient* NetworkClient::getInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new NetworkClient();
+    }
+    return instance;
+}
 
 NetworkClient::NetworkClient()
 {
@@ -8,21 +19,20 @@ NetworkClient::NetworkClient()
 
 }
 
-void NetworkClient::connect()
+void NetworkClient::connect(const QString &host, quint16 port)
 {
-    socket->connectToHost("172.16.33.91",quint16(5555));
-    socket->open(QIODevice::ReadWrite);
+    socket->connectToHost(host,port);
+
 }
 
 
-void NetworkClient::sendToServer(QString message)
+void NetworkClient::sendToServer(const QString &message)
 {
     if(!message.isEmpty())
     {
         socket->write(QString(message).toUtf8());
         socket->waitForBytesWritten();
     }
-
 }
 
 QString NetworkClient::receiveFromServer()

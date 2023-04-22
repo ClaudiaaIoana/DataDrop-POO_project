@@ -46,7 +46,9 @@ void Connection_manager::requests(SOCKET clientSocket)
 			char* identity = strtok(buffer, ":");
 			char				message[1024] = "";
 			copy = copy + strlen(identity) + 1;
+
 			std::cout << "Request received" << std::endl;
+
 			if (strcmp(identity, "LogIn") == 0)
 			{
 				if (login(copy))
@@ -54,6 +56,10 @@ void Connection_manager::requests(SOCKET clientSocket)
 				else
 					strcpy(message, "Gresit");
 				//free(copy);
+			}
+			else if (strcmp(identity, "Register") == 0)
+			{
+
 			}
 
 			int messageLength = strlen(message);

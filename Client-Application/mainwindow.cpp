@@ -7,6 +7,8 @@
 #include <QStringTokenizer>
 #include <QtCore>
 
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -14,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->NetworkManager=NetworkClient::getInstance();
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -35,17 +38,22 @@ void MainWindow::on_ButtonLogIn_clicked()
        QString message="LogIn:"+username+":"+password;
 
        this->NetworkManager->sendToServer(message);
-       QString checkLogger=this->NetworkManager->receiveFromServer();
-
-       if(checkLogger=="Corect")
+       QString checkLoggerAndFriendsList=this->NetworkManager->receiveFromServer();
+       QStringList tokens = checkLoggerAndFriendsList.split(':');
+       if(tokens[0] == "Corect")
        {
             hide();
             User *user = new User(username.toStdString());
-            QString friendList = this->NetworkManager->receiveFromServer();
-            QStringList tokens = friendList.split(':');
-
-            for (const auto& token : tokens) {
-                user->_addFriend(QString::fromStdString(token.toStdString()));
+            if(tokens[1] == "CuPrieteni")
+            {
+                for (auto it = std::next(tokens.begin(), 2); it != tokens.end(); ++it)
+                    {
+                      user->_addFriend(QString::fromStdString((*it).toStdString()));
+                    }
+            }
+            else if(tokens[1]=="FaraPrieteni")
+            {
+                user->_clearFriendsList();
             }
 
             AppInterface *app=new AppInterface(user);

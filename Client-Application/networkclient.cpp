@@ -73,7 +73,6 @@ QString NetworkClient::receiveFromServer()
 {
     socket->waitForReadyRead();
 
-
     QByteArray responseData = socket->readAll();
     QString response = QString::fromUtf8(responseData.constData(), responseData.length());
 

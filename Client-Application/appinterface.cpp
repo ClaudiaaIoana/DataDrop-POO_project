@@ -21,7 +21,6 @@ AppInterface::AppInterface(User *user,QWidget *parent):
 
     setInterface();
 
-
 }
 
 
@@ -267,7 +266,7 @@ void AppInterface::on_AttachButton_clicked()
     if (!file_path.isEmpty())
     {
          //ui->TextLineEdit->setText(file_path);
-        this->ManagerNetwork->sendFile(file_path);
+       // this->ManagerNetwork->sendFile(file_path);
     }
 }
 

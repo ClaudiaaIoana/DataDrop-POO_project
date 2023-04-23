@@ -24,6 +24,8 @@ public:
     //push-uri in vector
     void _addFriend(QString username);
 
+    void _clearFriendsList();
+
 };
 
 #endif // ABSTRACT_USER_H

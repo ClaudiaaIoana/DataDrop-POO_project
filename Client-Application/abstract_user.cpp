@@ -48,3 +48,7 @@ void Abstract_User::_addFriend(QString username)
     this->UsernameFriends.push_back(name);
 }
 
+ void Abstract_User::_clearFriendsList()
+ {
+     this->UsernameFriends.clear();
+ }

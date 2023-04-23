@@ -59,22 +59,26 @@ void Connection_manager::requests(SOCKET clientSocket)
 				std::string		username;
 				username = login(copy);
 				if (!username.empty())
-					strcpy(message, "Corect");
+				{
+					strcpy(message, "Corect:");
+					std::string			list = this->give_friend_list(username);
+					if (list.empty())
+					{
+						strcat(message, "FaraPrieteni");
+					}
+					else
+					{
+						strcat(message, "CuPrieteni:");
+						strcat(message, list.data());
+					}
+					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
+					conected_users_sockets.push_back(ClientSocket(username, clientSocket));
+				}
 				else
 					strcpy(message, "Gresit");
 
 				messageLength = strlen(message);
 				send(clientSocket, message, messageLength, 0);
-
-				if (strcmp(message,"Corect")==0)
-				{
-					std::string			list = this->give_friend_list(username);
-					strcpy(message,list.data());
-					messageLength = strlen(message);
-					send(clientSocket, message, messageLength, 0);
-					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
-					conected_users_sockets.push_back(ClientSocket(username, clientSocket));
-				}
 				
 			}
 
@@ -167,7 +171,8 @@ std::string Connection_manager::give_friend_list(std::string username)
 	{
 		friend_list_packet += *friend_;
 	}
-	friend_list_packet.pop_back();
+	if(!friend_list_packet.empty())
+		friend_list_packet.pop_back();
 	return friend_list_packet;
 }
 

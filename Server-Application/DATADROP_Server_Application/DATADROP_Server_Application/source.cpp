@@ -9,6 +9,7 @@
 
 int main()
 {
+
 	DB* db = DB::get_instance();
 	Connection_manager* con = Connection_manager::get_instance();
 	con->listen_();

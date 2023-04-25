@@ -20,16 +20,16 @@ private:
 private:
 	Connection_manager();
 	~Connection_manager() = default;
+	std::vector<std::string>	protocol(char* buffer);
+	void						requests(SOCKET clientSocket);
+	bool						login(std::string username, std::string password);
+	std::string					give_friend_list(std::string username);
+	void						register_(std::string email, std::string username, std::string password);
+	bool						add_friend(std::string user1, std::string user2);
+	SOCKET						is_connected(std::string receiver);
 public:
 	static						Connection_manager* get_instance();
 	static						void destroy_instance();
 	void						listen_();
-	void						requests(SOCKET clientSocket);
-	std::string					login(char* buffer);
-	std::string					give_friend_list(std::string username);
-	void						register_(char* buffer);
-	bool						add_friend(char* buffer);
-	std::vector<std::string>	message_breaking(char* buffer);
-	bool						is_connected(std::string receiver);
 };
 

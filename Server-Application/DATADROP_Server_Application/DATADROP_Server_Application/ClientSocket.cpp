@@ -13,6 +13,11 @@ std::string ClientSocket::getUsername()
     return std::string();
 }
 
+SOCKET ClientSocket::getSocket()
+{
+    return socket;
+}
+
 bool operator==(ClientSocket& sock, std::string client_username)
 {
     if (sock.client_username == client_username)

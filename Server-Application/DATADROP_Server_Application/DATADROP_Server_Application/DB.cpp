@@ -258,4 +258,49 @@ std::vector<std::string> DB::get_friend_list(std::string username)
     return usernames;
 }
 
+void DB::push_waiting_message(std::string sender, std::string receiver, std::string message)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"exec insert_message_user_user @Sender = ? , @Receiver = ? , @Message = ?";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sender.length(), 0, (SQLPOINTER)sender.c_str(), sender.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, message.length(), 0, (SQLPOINTER)message.c_str(), message.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "MESSAGE STORED" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+
+}
+
+
 

@@ -34,34 +34,42 @@ void Connection_manager::destroy_instance()
 		delete instance;
 }
 
+std::vector<std::string> Connection_manager::protocol(char* buffer)
+{
+	std::vector<std::string> segments;
+	char*					 token = strtok(buffer, ":");
+	
+	while (token)
+	{
+		segments.push_back(std::string(token));
+	}
+	return segments;
+}
+
 void Connection_manager::requests(SOCKET clientSocket)
 {
 	
 	bool running = true;
 	while (running)
 	{
-		char buffer[1024] = "";
-		int messageLength;
+		char						buffer[1024] = "";
+		int							messageLength;
+		char						message[2048];
+		std::vector<std::string>	segments;
 		if (recv(clientSocket, buffer, sizeof(buffer), 0))
 		{
-			char* copy = (char*)calloc(strlen(buffer), sizeof(char));
-			strcpy(copy, buffer);
-			char* identity = strtok(buffer, ":");
-			char				message[1024] = "";
-			copy = copy + strlen(identity) + 1;
-
+			segments = protocol(buffer);
 			std::cout << "Request received" << std::endl;
 
 
 			//LOGIN
-			if (strcmp(identity, "LogIn") == 0)
+			if (segments[0]=="LogIn")
 			{
-				std::string		username;
-				username = login(copy);
-				if (!username.empty())
+				
+				if (login(segments[1],segments[2]))
 				{
 					strcpy(message, "Corect:");
-					std::string			list = this->give_friend_list(username);
+					std::string			list = this->give_friend_list(segments[1]);
 					if (list.empty())
 					{
 						strcat(message, "FaraPrieteni");
@@ -72,7 +80,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 						strcat(message, list.data());
 					}
 					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
-					conected_users_sockets.push_back(ClientSocket(username, clientSocket));
+					conected_users_sockets.push_back(ClientSocket(segments[1], clientSocket));
 				}
 				else
 					strcpy(message, "Gresit");
@@ -83,15 +91,15 @@ void Connection_manager::requests(SOCKET clientSocket)
 			}
 
 			//REGISTER
-			else if (strcmp(identity, "Register") == 0)
+			else if (segments[0]=="Register")
 			{
-				register_(copy);
+				register_(segments[1],segments[2], segments[3]);
 			}
 
 			//ADD FRIEND
-			else if (strcmp(identity, "AddFriend") == 0)
+			else if (segments[0] == "AddFriend")
 			{
-				if (add_friend(copy))
+				if (add_friend(segments[1],segments[2]))
 				{
 					strcpy(message, "Adaugat");
 				}
@@ -104,9 +112,25 @@ void Connection_manager::requests(SOCKET clientSocket)
 			}
 
 			//MESSAGE RECEIVING AND SENDING
-			else if (strcmp(identity, "Mesaj") ==0)
+			else if (segments[0]=="Mesaj")
 			{
+				SOCKET receiver = is_connected(segments[2]);
+				if (receiver != NULL)
+				{
+					strcpy(message, "Mesaj:");
+					strcpy(message, segments[2].c_str());
+					strcpy(message, ":");
+					strcpy(message, segments[1].c_str());
+					strcpy(message, ":");
+					strcpy(message, segments[3].c_str());
 
+					messageLength = strlen(message);
+					send(receiver, message, messageLength, 0);
+				}
+				else
+				{
+					DB::get_instance()->push_waiting_message(segments[1], segments[2], segments[3]);
+				}
 			}
 
 			buffer[0] = '\0';
@@ -148,23 +172,17 @@ void Connection_manager::listen_()
 }
 
 
-std::string Connection_manager::login(char* buffer)
+bool Connection_manager::login(std::string username, std::string password)
 {
-	char*			 token = strtok(buffer, ":");
 	std::cout << "---------authentication---------\n";
-	std::string		username(token);
 	std::cout << "Username " << username << std::endl;
-
-	token = strtok(nullptr, ":");
-	std::string password(token);
-
 	std::cout << "Password " << password << std::endl;
 
 	if (DB::get_instance()->verify_account(username, password))
 	{
-		return username;
+		return true;
 	}
-	return std::string();
+	return false;
 }
 
 std::string Connection_manager::give_friend_list(std::string username)
@@ -182,37 +200,19 @@ std::string Connection_manager::give_friend_list(std::string username)
 	return friend_list_packet;
 }
 
-void Connection_manager::register_(char* buffer)
+void Connection_manager::register_(std::string email,std::string username, std::string password)
 {
-
-	char*				token = strtok(buffer, ":");
-	std::string			email(token);
-
 	std::cout << "---------register---------\n";
-
 	std::cout << "Email " << email << std::endl;
-
-	token = strtok(nullptr, ":");
-	std::string username(token);
 	std::cout << "Username " << username << std::endl;
-
-	token = strtok(nullptr, ":");
-	std::string password(token);
 	std::cout << "Password " << password << std::endl;
-
 
 	DB::get_instance()->add_account(username, email, password);
 }
 
-bool Connection_manager::add_friend(char* buffer)
+bool Connection_manager::add_friend(std::string user1, std::string user2)
 {
-	char* token = strtok(buffer, ":");
-	std::string			user1(token);
-	token = strtok(nullptr, ":");
-	std::string			user2(token);
-
 	std::cout << "---------add friend---------\n";
-
 	std::cout << "User1: " << user1 << std::endl;
 	std::cout << "User2 " << user2 << std::endl;
 
@@ -223,26 +223,13 @@ bool Connection_manager::add_friend(char* buffer)
 	return false;
 }
 
-std::vector<std::string> Connection_manager::message_breaking(char* buffer)
-{
-	std::vector<std::string> segments;
-	char*					 token=strtok(buffer, ":");
-	segments.push_back(std::string(token));
-	token = strtok(nullptr, ":");
-	segments.push_back(std::string(token));
-	token = strtok(nullptr, ":");
-	segments.push_back(std::string(token));
-
-	return segments;
-}
-
-bool Connection_manager::is_connected(std::string receiver)
+SOCKET Connection_manager::is_connected(std::string receiver)
 {
 	auto it = std::find(conected_users_sockets.begin(), conected_users_sockets.end(), receiver);
 	if (it != conected_users_sockets.end())
 	{
-		return true;
+		return (*it).getSocket();
 	}
-	return false;
+	return SOCKET();
 }
 

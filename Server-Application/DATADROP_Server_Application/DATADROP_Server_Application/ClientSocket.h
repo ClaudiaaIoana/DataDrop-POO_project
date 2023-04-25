@@ -12,6 +12,7 @@ public:
 	ClientSocket(std::string username, SOCKET socket);
 	~ClientSocket();
 	std::string		getUsername();
+	SOCKET			getSocket();
 	friend bool	operator==(ClientSocket& sock,std::string client_username);
 	friend bool	operator==(ClientSocket& sock, SOCKET client_socket);
 };

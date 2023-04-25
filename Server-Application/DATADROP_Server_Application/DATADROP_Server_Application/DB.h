@@ -27,5 +27,6 @@ public:
 	void							add_account(std::string username, std::string email, std::string password);
 	bool							add_friend(std::string user1, std::string user2);
 	std::vector<std::string>		get_friend_list(std::string username);
+	void							push_waiting_message(std::string sender, std::string receiver, std::string message);
 };
 

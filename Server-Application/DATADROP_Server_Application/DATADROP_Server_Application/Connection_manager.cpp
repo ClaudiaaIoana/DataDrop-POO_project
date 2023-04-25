@@ -42,6 +42,7 @@ std::vector<std::string> Connection_manager::protocol(char* buffer)
 	while (token)
 	{
 		segments.push_back(std::string(token));
+		token = strtok(nullptr, ":");
 	}
 	return segments;
 }

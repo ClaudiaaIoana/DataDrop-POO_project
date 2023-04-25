@@ -103,6 +103,12 @@ void Connection_manager::requests(SOCKET clientSocket)
 				send(clientSocket, message, messageLength, 0);
 			}
 
+			//MESSAGE RECEIVING AND SENDING
+			else if (strcmp(identity, "Mesaj") ==0)
+			{
+
+			}
+
 			buffer[0] = '\0';
 
 		}
@@ -216,3 +222,27 @@ bool Connection_manager::add_friend(char* buffer)
 	}
 	return false;
 }
+
+std::vector<std::string> Connection_manager::message_breaking(char* buffer)
+{
+	std::vector<std::string> segments;
+	char*					 token=strtok(buffer, ":");
+	segments.push_back(std::string(token));
+	token = strtok(nullptr, ":");
+	segments.push_back(std::string(token));
+	token = strtok(nullptr, ":");
+	segments.push_back(std::string(token));
+
+	return segments;
+}
+
+bool Connection_manager::is_connected(std::string receiver)
+{
+	auto it = std::find(conected_users_sockets.begin(), conected_users_sockets.end(), receiver);
+	if (it != conected_users_sockets.end())
+	{
+		return true;
+	}
+	return false;
+}
+

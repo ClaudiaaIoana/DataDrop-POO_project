@@ -21,13 +21,15 @@ private:
 	Connection_manager();
 	~Connection_manager() = default;
 public:
-	static			Connection_manager* get_instance();
-	static			void destroy_instance();
-	void			listen_();
-	void			requests(SOCKET clientSocket);
-	std::string		login(char* buffer);
-	std::string		give_friend_list(std::string username);
-	void			register_(char* buffer);
-	bool			add_friend(char* buffer);
+	static						Connection_manager* get_instance();
+	static						void destroy_instance();
+	void						listen_();
+	void						requests(SOCKET clientSocket);
+	std::string					login(char* buffer);
+	std::string					give_friend_list(std::string username);
+	void						register_(char* buffer);
+	bool						add_friend(char* buffer);
+	std::vector<std::string>	message_breaking(char* buffer);
+	bool						is_connected(std::string receiver);
 };
 

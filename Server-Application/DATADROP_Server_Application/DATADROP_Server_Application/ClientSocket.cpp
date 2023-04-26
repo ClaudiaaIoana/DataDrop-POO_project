@@ -2,6 +2,8 @@
 
 ClientSocket::ClientSocket(std::string username, SOCKET socket)
 {
+    this->client_username = username;
+    this->socket = socket;
 }
 
 ClientSocket::~ClientSocket()

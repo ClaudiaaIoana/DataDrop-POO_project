@@ -119,11 +119,11 @@ void Connection_manager::requests(SOCKET clientSocket)
 				if (receiver != NULL)
 				{
 					strcpy(message, "Mesaj:");
-					strcpy(message, segments[2].c_str());
-					strcpy(message, ":");
-					strcpy(message, segments[1].c_str());
-					strcpy(message, ":");
-					strcpy(message, segments[3].c_str());
+					strcat(message, segments[2].c_str());
+					strcat(message, ":");
+					strcat(message, segments[1].c_str());
+					strcat(message, ":");
+					strcat(message, segments[3].c_str());
 
 					messageLength = strlen(message);
 					send(receiver, message, messageLength, 0);

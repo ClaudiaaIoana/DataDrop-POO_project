@@ -18,15 +18,16 @@ class AddFriend : public QMainWindow
 public:
     explicit AddFriend(User *user,AppInterface *app,QWidget *parent = nullptr);
     ~AddFriend();
-
 private slots:
     void on_AddButton_clicked();
 
 private:
+    QTcpSocket *socket;
     AppInterface *appInterface;
     NetworkClient *ManagerNetwork;
     Ui::AddFriend *ui;
     User *myUser;
+    QString username;
 };
 
 #endif // ADDFRIEND_H

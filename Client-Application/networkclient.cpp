@@ -2,7 +2,7 @@
 #include <qdebug.h>
 #include <QFile>
 #include <QFileInfo>
-
+#include "serverlistener.h"
 
 NetworkClient* NetworkClient::instance = nullptr;
 
@@ -10,8 +10,13 @@ NetworkClient* NetworkClient::instance = nullptr;
 NetworkClient::NetworkClient()
 {
     this->socket=new QTcpSocket();
+    this->mutex=new QMutex();
 }
 
+ QTcpSocket *NetworkClient::getSocket()
+ {
+    return socket;
+ }
 
 NetworkClient* NetworkClient::getInstance()
 {
@@ -22,8 +27,14 @@ NetworkClient* NetworkClient::getInstance()
     return instance;
 }
 
+QMutex* NetworkClient::getMutex()
+{
+    return this->mutex;
+}
+
 void NetworkClient::connect(const QString &host, quint16 port)
 {
+    mutex->lock();
     if (socket->state() != QAbstractSocket::ConnectedState)
        {
            socket->connectToHost(host, port);
@@ -36,6 +47,7 @@ void NetworkClient::connect(const QString &host, quint16 port)
                        qDebug() << "Error: " << socket->errorString();
                    }
        }
+    mutex->unlock();
 }
 
 void NetworkClient::sendFile(const QString &filePath)
@@ -62,19 +74,21 @@ void NetworkClient::sendFile(const QString &filePath)
 
 void NetworkClient::sendToServer(const QString message)
 {
+    mutex->lock();
     if(!message.isEmpty())
     {
         socket->write(QString(message).toUtf8());
         socket->waitForBytesWritten();
     }
+    mutex->unlock();
 }
 
 QString NetworkClient::receiveFromServer()
 {
+    mutex->lock();
     socket->waitForReadyRead();
-
     QByteArray responseData = socket->readAll();
     QString response = QString::fromUtf8(responseData.constData(), responseData.length());
-
+    mutex->unlock();
     return response;
 }

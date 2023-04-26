@@ -6,7 +6,7 @@
 #include <QStringView>
 #include <QStringTokenizer>
 #include <QtCore>
-
+#include "serverlistener.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -22,7 +22,6 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
 
 void MainWindow::on_ButtonLogIn_clicked()
 {

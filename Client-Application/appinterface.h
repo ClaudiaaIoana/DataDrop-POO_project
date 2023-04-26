@@ -7,7 +7,10 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <string>
+#include <QThread>
 #include "networkclient.h"
+#include "serverlistener.h"
+#include <QObject>
 
 
 namespace Ui {
@@ -28,6 +31,10 @@ public:
     void onButtonClicked();
     void addFriend(QString username);
     ~AppInterface();
+signals:
+    void sendData(const QByteArray& data);
+public slots:
+    void onReadyRead();
 private slots:
 
      void on_AddFriendButton_clicked();
@@ -36,7 +43,12 @@ private slots:
 
      void on_AttachButton_clicked();
 
+     void on_sendButton_clicked();
+
 private:
+    //ServerListener *serverListener;
+    //QThread *WorkThread;
+    QTcpSocket*socket;
     NetworkClient *ManagerNetwork;
     Ui::AppInterface *ui;
     User *user;

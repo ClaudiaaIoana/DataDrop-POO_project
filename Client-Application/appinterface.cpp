@@ -1,6 +1,7 @@
 #include "appinterface.h"
 #include "ui_appinterface.h"
 #include "addfriend.h"
+#include "serverlistener.h"
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QTextEdit>
@@ -18,9 +19,9 @@ AppInterface::AppInterface(User *user,QWidget *parent):
 
     this->user=user;
     this->ManagerNetwork=NetworkClient::getInstance();
-
+ // this->WorkThread= new QThread(this);
+    this->socket=ManagerNetwork->getSocket();
     setInterface();
-
 }
 
 
@@ -48,6 +49,17 @@ void AppInterface::setInterface()
     {
             connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClicked);
     }
+
+    connect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+
+    //this->serverListener= ServerListener::getInstanta();
+    //connect(this, &AppInterface::sendData, serverListener, &ServerListener::sendData, Qt::QueuedConnection);
+    //serverListener->moveToThread(WorkThread);
+
+    //this->WorkThread->start();
+    //this->serverListener->startListening();
+    //connect(this, SIGNAL(sendData(QByteArray)), serverListener, SLOT(sendData(QByteArray)), Qt::QueuedConnection);
+   // connect(this, &AppInterface::sendData, serverListener, &ServerListener::sendData, Qt::QueuedConnection);
 }
 
 void AppInterface::setScrollArea(QScrollArea *scrollzone)
@@ -251,6 +263,7 @@ void AppInterface::on_AddFriendButton_clicked()
     hide();
     AddFriend *addFriendWindow =new AddFriend(user,this);
     addFriendWindow->show();
+    disconnect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
 }
 
 
@@ -265,8 +278,31 @@ void AppInterface::on_AttachButton_clicked()
     QString file_path = QFileDialog::getOpenFileName(this, "Selectați un fișier", "", "Toate fișierele (*.*)");
     if (!file_path.isEmpty())
     {
-         //ui->TextLineEdit->setText(file_path);
-       // this->ManagerNetwork->sendFile(file_path);
+
     }
 }
+
+void AppInterface::onReadyRead()
+{
+    QByteArray Data = socket->readAll();
+    qDebug() << "S-a primit raspunsul: "<<Data<<"\n";
+}
+
+void AppInterface::on_sendButton_clicked()
+{
+
+    QString newMessage=ui->TextLineEdit->text();
+    QString username=QString::fromStdString(this->user->_getUsername());
+    QString usernameToSend=this->usernameLabel->text();
+    QString message="Mesaj:" +username+":"+usernameToSend+":"+newMessage;
+    if(!message.isEmpty())
+    {
+        socket->write(QString(message).toUtf8());
+        socket->waitForBytesWritten();
+        qDebug()<<"S-a trimis mesajul:"<<message;
+        ui->TextLineEdit->setText("");
+    }
+}
+
+
 

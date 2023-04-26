@@ -3,6 +3,8 @@
 #include <QApplication>
 #include "networkclient.h"
 #include "user.h"
+#include "serverlistener.h"
+#include <QThread>
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +13,6 @@ int main(int argc, char *argv[])
 
     NetworkClient* networkManager=NetworkClient::getInstance();
     networkManager->connect("172.16.33.91",5555);
-
-     w.show();
+    w.show();
     return a.exec();
 }

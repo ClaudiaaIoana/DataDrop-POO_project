@@ -302,5 +302,87 @@ void DB::push_waiting_message(std::string sender, std::string receiver, std::str
 
 }
 
+std::vector<std::pair<std::string, std::string>>  DB::pop_waiting_messages(std::string user)
+{
+    std::vector<std::pair<std::string,std::string>>        sender_message;
+    SQLRETURN                                              retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"select U2.UserName, Message from WaitingMessages AS WM INNER JOIN Users AS U1 ON WM.ReceiverID = U1.UserID INNER JOIN Users AS U2 ON WM.SenderID = U2.UserID WHERE U1.UserName = ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, user.length(), 0, (SQLPOINTER)user.c_str(), user.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+
+        SQLCHAR sqlSender[SQL_RESULT_LEN];
+        SQLLEN ptrSqlSender;
+        SQLCHAR sqlMessage[SQL_RESULT_LEN];
+        SQLLEN ptrSqlMessage;
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            SQLGetData(hstmt, 1, SQL_CHAR, sqlSender, SQL_RESULT_LEN, &ptrSqlSender);
+            SQLGetData(hstmt, 2, SQL_CHAR, sqlMessage, SQL_RESULT_LEN, &ptrSqlMessage);
+            sender_message.push_back(std::make_pair((char*)sqlSender, (char*)sqlMessage));
+        }
+
+        std::cout << "SENDING MESSAGES TO "<<user << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE SENDING MESSAGE" << std::endl;
+    }
+
+    return sender_message;
+}
+
+void DB::delete_sent_messages(std::string receiver)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"DELETE WaitingMessages FROM WaitingMessages AS wm INNER JOIN Users AS u ON wm.ReceiverID = u.UserID WHERE u.UserName = ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "MESSAGES SENT" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE DELETING WAITING MESSAGES" << std::endl;
+    }
+
+}
+
 
 

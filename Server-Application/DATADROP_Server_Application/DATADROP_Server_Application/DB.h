@@ -7,7 +7,7 @@
 #include <sql.h>
 #include<vector>
 
-#define SQL_RESULT_LEN		240
+#define SQL_RESULT_LEN		3000
 #define SQL_RETURN_CODE_LEN 1000
 
 class DB:public _IDB
@@ -20,13 +20,15 @@ private:
 	DB();
 	~DB();
 public:
-	static DB*						get_instance();
-	static void						destroy_instance();
-	void							resetHanddle();
-	bool							verify_account(std::string username, std::string password);
-	void							add_account(std::string username, std::string email, std::string password);
-	bool							add_friend(std::string user1, std::string user2);
-	std::vector<std::string>		get_friend_list(std::string username);
-	void							push_waiting_message(std::string sender, std::string receiver, std::string message);
+	static DB*												get_instance();
+	static void												destroy_instance();
+	void													resetHanddle();
+	bool													verify_account(std::string username, std::string password);
+	void													add_account(std::string username, std::string email, std::string password);
+	bool													add_friend(std::string user1, std::string user2);
+	std::vector<std::string>								get_friend_list(std::string username);
+	void													push_waiting_message(std::string sender, std::string receiver, std::string message);
+	std::vector<std::pair<std::string, std::string>> 		pop_waiting_messages(std::string user);
+	void													delete_sent_messages(std::string receiver);
 };
 

@@ -118,14 +118,20 @@ void Connection_manager::requests(SOCKET clientSocket)
 				SOCKET receiver = is_connected(segments[2]);
 				if (receiver != NULL)
 				{
+
 					strcpy(message, "Mesaj:");
 					strcat(message, segments[2].c_str());
 					strcat(message, ":");
 					strcat(message, segments[1].c_str());
 					strcat(message, ":");
 					strcat(message, segments[3].c_str());
+					strcat(message, '\0');
 
+					uint32_t dimension;
+					dimension = strlen(message);
 					messageLength = strlen(message);
+
+					send(receiver, (char*)&dimension, sizeof(dimension), 0);
 					send(receiver, message, messageLength, 0);
 				}
 				else

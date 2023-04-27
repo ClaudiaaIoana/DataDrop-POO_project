@@ -10,6 +10,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QFileDialog>
+#include <QtEndian>
 
 AppInterface::AppInterface(User *user,QWidget *parent):
     QMainWindow(parent),
@@ -282,10 +283,37 @@ void AppInterface::on_AttachButton_clicked()
     }
 }
 
+QString AppInterface::getPushFromServer()
+{
+    QByteArray Data = socket->read(sizeof(uint32_t));
+    quint32 result=qFromLittleEndian<quint32>(Data.constData());
+    qDebug() << "S-a primit numarul de octeti: "<<result<<"\n";
+    QByteArray data=socket->read(result);
+    qDebug() << "S-a primit raspunsul: "<<data<<"\n";
+    return QString::fromUtf8(data);
+}
+
 void AppInterface::onReadyRead()
 {
-    QByteArray Data = socket->readAll();
-    qDebug() << "S-a primit raspunsul: "<<Data<<"\n";
+    while(socket->bytesAvailable()>sizeof(quint32))
+    {
+        QString dataFromServer = getPushFromServer();
+        if(dataFromServer=="fisier")
+        {
+            QString proba = getPushFromServer();
+            qDebug()<<"S-a primit fisierul"<<proba;
+            //TODO
+        }
+        else
+        {
+            QStringList tokens=dataFromServer.split(':');
+            if(tokens[0]== "Mesaj")
+            {
+                Message *newMessage= new Message(tokens[1],tokens[2],token[3]);
+                this->messages.append(newMessage);
+            }
+        }
+    }
 }
 
 void AppInterface::on_sendButton_clicked()

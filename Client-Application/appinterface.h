@@ -11,6 +11,7 @@
 #include "networkclient.h"
 #include "serverlistener.h"
 #include <QObject>
+#include "message.h"
 
 
 namespace Ui {
@@ -30,6 +31,7 @@ public:
     void setInterface();
     void onButtonClicked();
     void addFriend(QString username);
+    QString getPushFromServer();
     ~AppInterface();
 signals:
     void sendData(const QByteArray& data);
@@ -48,11 +50,13 @@ private slots:
 private:
     //ServerListener *serverListener;
     //QThread *WorkThread;
+
     QTcpSocket*socket;
     NetworkClient *ManagerNetwork;
     Ui::AppInterface *ui;
     User *user;
     QList<QPushButton*> FriendsList;
+    QList<Message*> messages;
     QLabel *usernameIcon;
     QLabel *usernameLabel;
     QHBoxLayout *topBarArea;

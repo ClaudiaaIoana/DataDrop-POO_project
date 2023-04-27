@@ -12,6 +12,8 @@
 #include "serverlistener.h"
 #include <QObject>
 #include "message.h"
+#include <QListView>
+#include <QListWidget>
 
 
 namespace Ui {
@@ -29,6 +31,7 @@ public:
     void setChatZone(QPushButton *userButton);
     void setScrollArea(QScrollArea *scrollzone);
     void setInterface();
+    void setMessages();
     void onButtonClicked();
     void addFriend(QString username);
     QString getPushFromServer();
@@ -48,9 +51,7 @@ private slots:
      void on_sendButton_clicked();
 
 private:
-    //ServerListener *serverListener;
-    //QThread *WorkThread;
-
+    QListWidget *listaMesaje;
     QTcpSocket*socket;
     NetworkClient *ManagerNetwork;
     Ui::AppInterface *ui;

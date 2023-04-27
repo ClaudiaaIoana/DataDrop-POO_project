@@ -63,8 +63,9 @@
      </size>
     </property>
     <property name="styleSheet">
-     <string notr="true">image: url(:/qwd83nc4xxf41.jpg); 
-background-repeat: no-repeat;
+     <string notr="true">
+ background-repeat: no-repeat;
+image: url(:/qwd83nc4xxf41.jpg);
     background-size: contain;
     opacity: 0.8;</string>
     </property>
@@ -170,6 +171,21 @@ background:transparent;
      </property>
      <property name="text">
       <string/>
+     </property>
+    </widget>
+    <widget class="QListWidget" name="listaMesaje">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>81</y>
+       <width>441</width>
+       <height>401</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: transparent;
+  border: none;
+  outline: none;</string>
      </property>
     </widget>
    </widget>

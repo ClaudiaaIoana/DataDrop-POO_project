@@ -82,12 +82,18 @@ void Connection_manager::requests(SOCKET clientSocket)
 					}
 					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
 					conected_users_sockets.push_back(ClientSocket(segments[1], clientSocket));
+
+					messageLength = strlen(message);
+					send(clientSocket, message, messageLength, 0);
+
+					send_messages_at_connection(clientSocket, segments[1]);
 				}
 				else
+				{
 					strcpy(message, "Gresit");
-
-				messageLength = strlen(message);
-				send(clientSocket, message, messageLength, 0);
+					messageLength = strlen(message);
+					send(clientSocket, message, messageLength, 0);
+				}
 				
 			}
 
@@ -125,7 +131,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 					strcat(message, segments[1].c_str());
 					strcat(message, ":");
 					strcat(message, segments[3].c_str());
-					strcat(message, '\0');
+					strcat(message, "\0");
 
 					uint32_t dimension;
 					dimension = strlen(message);
@@ -239,4 +245,30 @@ SOCKET Connection_manager::is_connected(std::string receiver)
 	}
 	return SOCKET();
 }
+
+void Connection_manager::send_messages_at_connection(SOCKET clientSocket, std::string username)
+{
+	std::vector<std::pair<std::string, std::string>> sender_message;
+	int												 messageLength;
+	char											 message[2048] = "\0";
+	sender_message = DB::get_instance()->pop_waiting_messages(username);
+
+	for (auto it = sender_message.begin(); it != sender_message.end(); it++)
+	{
+		strcpy(message, "Mesaj:");
+		strcat(message, (*it).first.c_str());
+		strcat(message, ":");
+		strcat(message, (*it).second.c_str());
+		strcat(message, "\0");
+
+		uint32_t dimension;
+		dimension = strlen(message);
+		messageLength = strlen(message);
+
+		send(clientSocket, (char*)&dimension, sizeof(dimension), 0);
+		send(clientSocket, message, messageLength, 0);
+		Sleep(10);
+	}
+}
+
 

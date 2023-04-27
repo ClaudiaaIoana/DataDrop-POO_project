@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     NetworkClient* networkManager=NetworkClient::getInstance();
-    networkManager->connect("172.20.10.2",5555);
+    networkManager->connect("172.16.33.91",5555);
     w.show();
     return a.exec();
 }

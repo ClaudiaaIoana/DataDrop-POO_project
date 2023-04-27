@@ -11,6 +11,9 @@
 #include <QScrollBar>
 #include <QFileDialog>
 #include <QtEndian>
+#include <QStandardItemModel>
+#include <QScroller>
+
 
 AppInterface::AppInterface(User *user,QWidget *parent):
     QMainWindow(parent),
@@ -20,7 +23,6 @@ AppInterface::AppInterface(User *user,QWidget *parent):
 
     this->user=user;
     this->ManagerNetwork=NetworkClient::getInstance();
- // this->WorkThread= new QThread(this);
     this->socket=ManagerNetwork->getSocket();
     setInterface();
 }
@@ -52,15 +54,6 @@ void AppInterface::setInterface()
     }
 
     connect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-
-    //this->serverListener= ServerListener::getInstanta();
-    //connect(this, &AppInterface::sendData, serverListener, &ServerListener::sendData, Qt::QueuedConnection);
-    //serverListener->moveToThread(WorkThread);
-
-    //this->WorkThread->start();
-    //this->serverListener->startListening();
-    //connect(this, SIGNAL(sendData(QByteArray)), serverListener, SLOT(sendData(QByteArray)), Qt::QueuedConnection);
-   // connect(this, &AppInterface::sendData, serverListener, &ServerListener::sendData, Qt::QueuedConnection);
 }
 
 void AppInterface::setScrollArea(QScrollArea *scrollzone)
@@ -218,7 +211,44 @@ void AppInterface::setChatZone(QPushButton *userButton)
     topBarArea->setAlignment(usernameLabel, Qt::AlignTop);
     topBarArea->setAlignment(usernameIcon, Qt::AlignTop);
 
+
 }
+
+
+
+void AppInterface::setMessages()
+{
+        ui->listaMesaje->clear();
+
+            for(int i=0; i<messages.size(); i++)
+            {
+                if(messages[i]->getSender() == usernameLabel->text() && messages[i]->getReceiver() == QString::fromStdString(user->_getUsername()))
+                {
+                    QListWidgetItem *message = new QListWidgetItem(messages[i]->getContentMessage());
+                    QPixmap image(":/man_person.png");
+                    QFont font;
+                    font.setPointSize(12);
+                    message->setFont(font);
+                    QPixmap scaledImage = image.scaled(QSize(50, 50));
+                    message->setIcon(QIcon(scaledImage));
+                    message->setTextAlignment(Qt::AlignLeft);
+                    ui->listaMesaje->addItem(message);
+                }
+                if(messages[i]->getSender() == QString::fromStdString(user->_getUsername()) && messages[i]->getReceiver() == usernameLabel->text())
+                {
+                    QListWidgetItem *message = new QListWidgetItem(messages[i]->getContentMessage());
+                    message->setTextAlignment(Qt::AlignRight);
+                    QFont font;
+                    font.setPointSize(12);
+                    message->setFont(font);
+                    ui->listaMesaje->addItem(message);
+                }
+            }
+
+            ui->listaMesaje->scrollToBottom();
+}
+
+
 
  void AppInterface::addFriend(QString username)
  {
@@ -250,6 +280,7 @@ void AppInterface::onButtonClicked()
 
     QPushButton *button = qobject_cast<QPushButton *>(sender());
     setChatZone(button);
+    setMessages();
 
 }
 
@@ -309,8 +340,9 @@ void AppInterface::onReadyRead()
             QStringList tokens=dataFromServer.split(':');
             if(tokens[0]== "Mesaj")
             {
-                Message *newMessage= new Message(tokens[1],tokens[2],token[3]);
+                Message *newMessage= new Message(tokens[1],tokens[2],tokens[3]);
                 this->messages.append(newMessage);
+                setMessages();
             }
         }
     }
@@ -323,13 +355,17 @@ void AppInterface::on_sendButton_clicked()
     QString username=QString::fromStdString(this->user->_getUsername());
     QString usernameToSend=this->usernameLabel->text();
     QString message="Mesaj:" +username+":"+usernameToSend+":"+newMessage;
-    if(!message.isEmpty())
+    if(!newMessage.isEmpty())
     {
         socket->write(QString(message).toUtf8());
         socket->waitForBytesWritten();
         qDebug()<<"S-a trimis mesajul:"<<message;
+        Message *message =new Message(username,usernameToSend,newMessage);
+        messages.append(message);
         ui->TextLineEdit->setText("");
+        setMessages();
     }
+
 }
 
 

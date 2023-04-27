@@ -86,7 +86,8 @@ void Connection_manager::requests(SOCKET clientSocket)
 					messageLength = strlen(message);
 					send(clientSocket, message, messageLength, 0);
 
-					send_messages_at_connection(clientSocket, segments[1]);
+					//TODO DECOMENT
+					//send_messages_at_connection(clientSocket, segments[1]);
 				}
 				else
 				{
@@ -259,7 +260,7 @@ void Connection_manager::send_messages_at_connection(SOCKET clientSocket, std::s
 		strcat(message, (*it).first.c_str());
 		strcat(message, ":");
 		strcat(message, (*it).second.c_str());
-		strcat(message, "\0");
+		strcat(message, "\0");		
 
 		uint32_t dimension;
 		dimension = strlen(message);

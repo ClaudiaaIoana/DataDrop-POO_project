@@ -27,7 +27,7 @@ private:
 	void						register_(std::string email, std::string username, std::string password);
 	bool						add_friend(std::string user1, std::string user2);
 	SOCKET						is_connected(std::string receiver);
-	void						send_messages_at_connection(SOCKET clientSocket, std::string username);
+	void						send_messages_at_connection(SOCKET clientSocket, std::string sender);
 public:
 	static						Connection_manager* get_instance();
 	static						void destroy_instance();

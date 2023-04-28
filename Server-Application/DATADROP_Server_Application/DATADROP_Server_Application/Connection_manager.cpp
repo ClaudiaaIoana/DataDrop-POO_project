@@ -86,8 +86,8 @@ void Connection_manager::requests(SOCKET clientSocket)
 					messageLength = strlen(message);
 					send(clientSocket, message, messageLength, 0);
 
-					//TODO DECOMENT
-					//send_messages_at_connection(clientSocket, segments[1]);
+					Sleep(10);
+					send_messages_at_connection(clientSocket, segments[1]);
 				}
 				else
 				{
@@ -127,9 +127,9 @@ void Connection_manager::requests(SOCKET clientSocket)
 				{
 
 					strcpy(message, "Mesaj:");
-					strcat(message, segments[2].c_str());
-					strcat(message, ":");
 					strcat(message, segments[1].c_str());
+					strcat(message, ":");
+					strcat(message, segments[2].c_str());
 					strcat(message, ":");
 					strcat(message, segments[3].c_str());
 					strcat(message, "\0");
@@ -259,6 +259,8 @@ void Connection_manager::send_messages_at_connection(SOCKET clientSocket, std::s
 		strcpy(message, "Mesaj:");
 		strcat(message, (*it).first.c_str());
 		strcat(message, ":");
+		strcat(message, username.c_str());
+		strcat(message, ":");
 		strcat(message, (*it).second.c_str());
 		strcat(message, "\0");		
 
@@ -268,7 +270,7 @@ void Connection_manager::send_messages_at_connection(SOCKET clientSocket, std::s
 
 		send(clientSocket, (char*)&dimension, sizeof(dimension), 0);
 		send(clientSocket, message, messageLength, 0);
-		Sleep(10);
+		Sleep(100);
 	}
 }
 

@@ -12,6 +12,7 @@ private:
     QMutex *mutex;
     NetworkClient();
 public:
+    void disconectSocket();
     static NetworkClient* getInstance();
     void connect(const QString& host, quint16 port);
     void sendToServer(const QString message);

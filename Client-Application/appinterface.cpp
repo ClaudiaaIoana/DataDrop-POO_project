@@ -27,6 +27,18 @@ AppInterface::AppInterface(User *user,QWidget *parent):
     setInterface();
 }
 
+AppInterface::AppInterface(User *user,QList<Message*> messages,QWidget *parent):
+    QMainWindow(parent),messages(messages),
+    ui(new Ui::AppInterface)
+{
+    ui->setupUi(this);
+
+    this->user=user;
+    this->ManagerNetwork=NetworkClient::getInstance();
+    this->socket=ManagerNetwork->getSocket();
+    setInterface();
+}
+
 
 void AppInterface::setInterface()
 {
@@ -245,7 +257,7 @@ void AppInterface::setMessages()
                 }
             }
 
-            ui->listaMesaje->scrollToBottom();
+           // ui->listaMesaje->scrollToBottom();
 }
 
 

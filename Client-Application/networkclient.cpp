@@ -18,6 +18,11 @@ NetworkClient::NetworkClient()
     return socket;
  }
 
+ void NetworkClient::disconectSocket()
+ {
+     socket->disconnectFromHost();
+ }
+
 NetworkClient* NetworkClient::getInstance()
 {
     if (instance == nullptr)

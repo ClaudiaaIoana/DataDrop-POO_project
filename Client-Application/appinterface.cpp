@@ -326,6 +326,7 @@ QString AppInterface::getPushFromServer()
 
 void AppInterface::onReadyRead()
 {
+    bool modify=false;
     while(socket->bytesAvailable()>sizeof(quint32))
     {
         QString dataFromServer = getPushFromServer();
@@ -342,10 +343,13 @@ void AppInterface::onReadyRead()
             {
                 Message *newMessage= new Message(tokens[1],tokens[2],tokens[3]);
                 this->messages.append(newMessage);
-                setMessages();
+                if( usernameLabel !=nullptr)
+                    setMessages();
+
             }
         }
     }
+
 }
 
 void AppInterface::on_sendButton_clicked()

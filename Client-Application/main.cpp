@@ -14,5 +14,6 @@ int main(int argc, char *argv[])
     NetworkClient* networkManager=NetworkClient::getInstance();
     networkManager->connect("172.16.33.91",5555);
     w.show();
+
     return a.exec();
 }

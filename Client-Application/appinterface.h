@@ -26,6 +26,7 @@ class AppInterface : public QMainWindow
 
 public:
     explicit AppInterface(User *user,QWidget *parent = nullptr);
+    explicit AppInterface(User *user,QList<Message*> messages,QWidget *parent=nullptr);
     void onSearchEnterPressed();
     void setScrollZone();
     void setChatZone(QPushButton *userButton);

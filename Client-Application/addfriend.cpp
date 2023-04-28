@@ -40,8 +40,7 @@ void AddFriend::on_AddButton_clicked()
     {
     hide();
     this->myUser->_addFriend(username);
-    AppInterface *newApp=new AppInterface(myUser);
-   // disconnect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+    AppInterface *newApp=this->appInterface;
     newApp->show();
     }
     if(response == "Respins")

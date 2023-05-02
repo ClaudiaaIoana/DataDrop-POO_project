@@ -57,7 +57,10 @@ void Connection_manager::requests(SOCKET clientSocket)
 		int							messageLength;
 		char						message[2048];
 		std::vector<std::string>	segments;
+
+
 		recv(clientSocket, buffer, sizeof(buffer), 0);
+
 		segments = protocol(buffer);
 		std::cout << "Request received" << std::endl;
 
@@ -137,13 +140,19 @@ void Connection_manager::requests(SOCKET clientSocket)
 			//FILE RECEIVING AND SENDING
 			else if (segments[0] == "File")
 			{
-				int					dimention = std::stoi(segments[4]);
-				char*				content =(char*) calloc(dimention, sizeof(char));
+				int					dimension = std::stoi(segments[4]);
+				char*				content =(char*) calloc(dimension, sizeof(char));
 				SOCKET				receiver = is_connected(segments[2]);
 
-				recv(clientSocket, content, dimention, 0);
+				content[0]='\0';
+				int					aux_dim = dimension;
+				while (aux_dim >= 0)
+				{
+					this->receive_file_on_chunks(clientSocket, &content);
+					aux_dim -= 1024;
+				}
 				
-				File file(segments[1], segments[2], segments[3], dimention, content);
+				File file(segments[1], segments[2], segments[3], dimension, content);
 
 				if (receiver != NULL)
 				{
@@ -308,6 +317,13 @@ void Connection_manager::send_message_for_connected_user(SOCKET receiver, std::s
 
 	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
 	send(receiver, message, messageLength, 0);
+}
+
+void Connection_manager::receive_file_on_chunks(SOCKET client_socket, char** content)
+{
+	char			buffer[1024] = "\0";
+	recv(client_socket, buffer, sizeof(buffer), 0);
+	strcat((*content), buffer);
 }
 
 void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::string sender)

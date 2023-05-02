@@ -62,6 +62,8 @@ void Connection_manager::requests(SOCKET clientSocket)
 			segments = protocol(buffer);
 			std::cout << "Request received" << std::endl;
 
+			if (strcmp(buffer ,"")==0)
+				goto Close_socket;
 
 			//LOGIN
 			if (segments[0]=="LogIn")
@@ -146,6 +148,10 @@ void Connection_manager::requests(SOCKET clientSocket)
 					DB::get_instance()->push_waiting_message(segments[1], segments[2], segments[3]);
 				}
 			}
+			else if (segments[0] == "Creare_grup")
+			{
+				DB::get_instance()->create_group_with_members(segments[1], std::vector<std::string>(segments.begin() + 2, segments.end()));
+			}
 
 			buffer[0] = '\0';
 
@@ -153,6 +159,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 		//erasing the socket from memory
 		else
 		{
+			Close_socket:
 			running = false;
 			if(std::find(this->conected_device_sockets.begin(),this->conected_device_sockets.end(), clientSocket)!=this->conected_device_sockets.end())
 					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
@@ -161,6 +168,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 					conected_users_sockets.erase(std::remove(conected_users_sockets.begin(), conected_users_sockets.end(), clientSocket), conected_users_sockets.end());
 		}
 	}
+	std::cout << "Connection closed" << std::endl;
 	closesocket(clientSocket);
 	//TODO EXCEPTION
 }
@@ -272,6 +280,7 @@ void Connection_manager::send_messages_at_connection(SOCKET clientSocket, std::s
 		send(clientSocket, message, messageLength, 0);
 		Sleep(100);
 	}
+	DB::get_instance()->delete_sent_messages(username);
 }
 
 

@@ -30,5 +30,9 @@ public:
 	void													push_waiting_message(std::string sender, std::string receiver, std::string message);
 	std::vector<std::pair<std::string, std::string>> 		pop_waiting_messages(std::string user);
 	void													delete_sent_messages(std::string receiver);
+	void													create_group_with_members(std:: string group_name, std::vector<std::string> users);
+	void													create_empty_group(std::string group_name);
+	void													add_member_in_group(std::string group_name,std::string username);
+
 };
 

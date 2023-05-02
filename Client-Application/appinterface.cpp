@@ -14,6 +14,7 @@
 #include <QStandardItemModel>
 #include <QScroller>
 
+#define CHUNK_SIZE 1024
 
 AppInterface::AppInterface(User *user,QWidget *parent):
     QMainWindow(parent),
@@ -66,6 +67,7 @@ void AppInterface::setInterface()
     }
 
     connect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+    connect(ui->TextLineEdit, &QLineEdit::returnPressed, this, &AppInterface::on_sendButton_clicked);
 }
 
 void AppInterface::setScrollArea(QScrollArea *scrollzone)
@@ -230,8 +232,28 @@ void AppInterface::setChatZone(QPushButton *userButton)
 
 void AppInterface::setMessages()
 {
-        ui->listaMesaje->clear();
-
+       ui->listaMesaje->clear();
+       ui->listaMesaje->setFixedSize(441, 401);
+       ui->listaMesaje->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+       QString scrollBarStyle = "QScrollBar:vertical {"
+                                "background-color: #F4F4F4;"
+                                "width: 12px;"
+                                "margin: 0px;"
+                                "}"
+                                "QScrollBar::handle:vertical {"
+                                "background-color: #DADADA;"
+                                "min-height: 20px;"
+                                "border-radius: 5px;"
+                                "}"
+                                "QScrollBar::handle:hover:vertical {"
+                                "background-color: #C1C1C1;"
+                                "}"
+                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,"
+                                "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+                                "background-color: #F4F4F4;"
+                                "}";
+       ui->listaMesaje->verticalScrollBar()->setStyleSheet(scrollBarStyle);
+       ui->listaMesaje->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
             for(int i=0; i<messages.size(); i++)
             {
                 if(messages[i]->getSender() == usernameLabel->text() && messages[i]->getReceiver() == QString::fromStdString(user->_getUsername()))
@@ -257,7 +279,8 @@ void AppInterface::setMessages()
                 }
             }
 
-           // ui->listaMesaje->scrollToBottom();
+            ui->listaMesaje->scrollToBottom(); // deruleaza lista la ultimul element
+          //  ui->listaMesaje->updateGeometry();
 }
 
 
@@ -322,8 +345,34 @@ void AppInterface::on_AttachButton_clicked()
     QString file_path = QFileDialog::getOpenFileName(this, "Selectați un fișier", "", "Toate fișierele (*.*)");
     if (!file_path.isEmpty())
     {
+          QFile file(file_path);
+          if (!file.open(QIODevice::ReadOnly))
+          {
+              qDebug()<<"Failed to open file";
+              return;
+          }
 
+          this->socket->write("fisier");
+
+          QFileInfo fileInfo(file_path);
+          QString fileName = fileInfo.fileName();
+          qint32 fileNameSize =fileName.size();
+
+          this->socket->write((char*)&fileNameSize, sizeof(qint32));
+          this->socket->write(fileName.toUtf8());
+
+          QDataStream out(this->socket);
+          out.setVersion(QDataStream::Qt_5_0);
+          qint32 fileSize = file.size();
+          qDebug() << "File size: " << fileSize;
+
+          QByteArray data = file.readAll();
+          out.writeRawData(data.constData(), data.size());
+          qDebug() << "Sent " << data.size() << " bytes.";
+
+          file.close();
     }
+
 }
 
 QString AppInterface::getPushFromServer()
@@ -338,7 +387,7 @@ QString AppInterface::getPushFromServer()
 
 void AppInterface::onReadyRead()
 {
-    bool modify=false;
+
     while(socket->bytesAvailable()>sizeof(quint32))
     {
         QString dataFromServer = getPushFromServer();

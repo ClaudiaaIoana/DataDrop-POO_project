@@ -66,7 +66,7 @@
      <string notr="true">
  background-repeat: no-repeat;
 image: url(:/qwd83nc4xxf41.jpg);
-    background-size: contain;
+    
     opacity: 0.8;</string>
     </property>
     <widget class="QPushButton" name="sendButton">
@@ -177,15 +177,36 @@ background:transparent;
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>81</y>
-       <width>441</width>
-       <height>401</height>
+       <y>71</y>
+       <width>450</width>
+       <height>430</height>
       </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>450</width>
+       <height>430</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color: transparent;
   border: none;
   outline: none;</string>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
      </property>
     </widget>
    </widget>

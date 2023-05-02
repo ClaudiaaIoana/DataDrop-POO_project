@@ -421,6 +421,8 @@ void AppInterface::on_AttachButton_clicked()
 
           ControlMessage=ControlMessage+QString::number(fileSize);
 
+          socket->write(QString(ControlMessage).toUtf8());
+          socket->waitForBytesWritten();
 
           QDataStream out(this->socket);
           out.setVersion(QDataStream::Qt_5_0);
@@ -457,7 +459,7 @@ void AppInterface::onReadyRead()
 
             int fileSize=tokens[4].toInt();
             QByteArray file= this->socket->read(fileSize);
-            this->socket->waitForReadyRead();
+           // this->socket->waitForReadyRead();
 
             QFile File(tokens[3]);
                     if(File.open(QIODevice::WriteOnly))

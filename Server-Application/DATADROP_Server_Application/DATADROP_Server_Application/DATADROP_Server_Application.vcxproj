@@ -134,6 +134,7 @@
     <ClCompile Include="Exception_connecting_db.cpp" />
     <ClCompile Include="Exception_format.cpp" />
     <ClCompile Include="Exception_sending.cpp" />
+    <ClCompile Include="File.cpp" />
     <ClCompile Include="_IDB.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Connection_manager.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Exception_connecting_db.h" />
     <ClInclude Include="Exception_format.h" />
     <ClInclude Include="Exception_sending.h" />
+    <ClInclude Include="File.h" />
     <ClInclude Include="_IDB.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="Connection_manager.h" />

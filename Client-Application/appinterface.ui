@@ -63,9 +63,9 @@
      </size>
     </property>
     <property name="styleSheet">
-     <string notr="true">
+     <string notr="true">image: url(:/qwd83nc4xxf41.jpg);
  background-repeat: no-repeat;
-image: url(:/qwd83nc4xxf41.jpg);
+
     
     opacity: 0.8;</string>
     </property>
@@ -332,6 +332,72 @@ cursor: pointer;
     <property name="text">
      <string/>
     </property>
+   </widget>
+   <widget class="QDockWidget" name="CreateGrup_2">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>50</y>
+      <width>300</width>
+      <height>450</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <widget class="QWidget" name="dockWidgetContents_6">
+     <widget class="QPlainTextEdit" name="plainTextEdit">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>10</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;
+    color: #1E90FF;
+    font-family: Arial;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    border: none;</string>
+      </property>
+      <property name="plainText">
+       <string>Create a group</string>
+      </property>
+     </widget>
+     <widget class="QScrollArea" name="CreateGroupScroll">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>134</y>
+        <width>271</width>
+        <height>281</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border: none; </string>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>271</width>
+         <height>281</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

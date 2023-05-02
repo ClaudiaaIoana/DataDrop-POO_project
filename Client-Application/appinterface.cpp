@@ -22,9 +22,11 @@ AppInterface::AppInterface(User *user,QWidget *parent):
 {
     ui->setupUi(this);
 
+
     this->user=user;
     this->ManagerNetwork=NetworkClient::getInstance();
     this->socket=ManagerNetwork->getSocket();
+    ui->CreateGrup_2->hide();
     setInterface();
 }
 
@@ -37,6 +39,7 @@ AppInterface::AppInterface(User *user,QList<Message*> messages,QWidget *parent):
     this->user=user;
     this->ManagerNetwork=NetworkClient::getInstance();
     this->socket=ManagerNetwork->getSocket();
+    ui->CreateGrup_2->hide();
     setInterface();
 }
 
@@ -49,6 +52,7 @@ void AppInterface::setInterface()
     ui->Search->setPlaceholderText("  Search Friends...");
     ui->TextLineEdit->setPlaceholderText(" Type ");
 
+
     ui->sendButton->setVisible(false);
     ui->TextLineEdit->setVisible(false);
     ui->AttachButton->setVisible(false);
@@ -57,7 +61,7 @@ void AppInterface::setInterface()
     this->usernameLabel=nullptr;
     this->usernameIcon=nullptr;
 
-    connect(ui->Search, &QLineEdit::textChanged, this, &AppInterface::onSearchEnterPressed);
+
 
     setScrollZone();
 
@@ -66,6 +70,7 @@ void AppInterface::setInterface()
             connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClicked);
     }
 
+    connect(ui->Search, &QLineEdit::textChanged, this, &AppInterface::onSearchEnterPressed);
     connect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
     connect(ui->TextLineEdit, &QLineEdit::returnPressed, this, &AppInterface::on_sendButton_clicked);
 }
@@ -280,7 +285,7 @@ void AppInterface::setMessages()
             }
 
             ui->listaMesaje->scrollToBottom(); // deruleaza lista la ultimul element
-          //  ui->listaMesaje->updateGeometry();
+
 }
 
 
@@ -337,6 +342,50 @@ void AppInterface::on_AddFriendButton_clicked()
 void AppInterface::on_CreateGroupButton_clicked()
 {
 
+    QScrollArea *scrollArea = new QScrollArea(ui->CreateGroupScroll);
+    setScrollArea(scrollArea);
+    QWidget *scrollWidget = new QWidget(scrollArea);
+    QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
+
+    scrollWidget->setMinimumSize(ui->centralwidget->width(), ui->centralwidget->height() * 0.8);
+    scrollLayout->setAlignment(Qt::AlignTop);
+
+    QList<QPushButton*> buttonList;
+
+    for (int i = 0; i < this->user->_getSizeFriendBuffer(); ++i) {
+            QString usernameIndexName=QString::fromStdString(user->_getUsernameIndex(i));
+            QPushButton *button = new QPushButton(usernameIndexName);
+            QIcon icon(":/man_person.png"); // încărcați imaginea utilizatorului dintr-un fișier
+            button->setIcon(icon);
+            button->setIconSize(QSize(25, 25));
+            button->setStyleSheet("QPushButton {"
+                                      "border: none;"
+                                      "background-color: transparent;"
+                                      "color: #1E90FF;"
+                                      "padding: 8px 16px;"
+                                      "font-family: Arial, sans-serif;"
+                                      "font-size: 14px;"
+                                      "font-weight: bold;"
+                                      "text-align: left;"
+                                      "text-transform: none;"
+                                      "border-radius: 12px;"
+                                  "}"
+                                  "QPushButton:hover {"
+                                      "background-color: rgba(0, 0, 0, 0.05);"
+                                  "}"
+                                  "QPushButton:pressed {"
+                                      "background-color: rgba(0, 0, 0, 0.1);"
+                                  "}");
+            button->setProperty("tipButon", "persoana");
+            buttonList.append(button);
+        }
+
+    for (QPushButton *button :buttonList)
+    {
+          scrollLayout->addWidget(button);
+    }
+    scrollArea->setWidget(scrollWidget);
+    ui->CreateGrup_2->show();
 }
 
 
@@ -352,19 +401,29 @@ void AppInterface::on_AttachButton_clicked()
               return;
           }
 
-          this->socket->write("fisier");
+
+
+          //this->socket->write("fisier");
 
           QFileInfo fileInfo(file_path);
           QString fileName = fileInfo.fileName();
-          qint32 fileNameSize =fileName.size();
 
-          this->socket->write((char*)&fileNameSize, sizeof(qint32));
-          this->socket->write(fileName.toUtf8());
+          QString ControlMessage="File:";
+          ControlMessage=ControlMessage+QString::fromStdString(user->_getUsername())+":"+usernameLabel->text()+":"
+                  +fileName+":";
+
+          //qint32 fileNameSize =fileName.size();
+
+          //this->socket->write((char*)&fileNameSize, sizeof(qint32));
+          //this->socket->write(fileName.toUtf8());
+          qint32 fileSize = file.size();
+          qDebug() << "File size: " << fileSize;
+
+          ControlMessage=ControlMessage+QString::number(fileSize);
+
 
           QDataStream out(this->socket);
           out.setVersion(QDataStream::Qt_5_0);
-          qint32 fileSize = file.size();
-          qDebug() << "File size: " << fileSize;
 
           QByteArray data = file.readAll();
           out.writeRawData(data.constData(), data.size());
@@ -391,24 +450,45 @@ void AppInterface::onReadyRead()
     while(socket->bytesAvailable()>sizeof(quint32))
     {
         QString dataFromServer = getPushFromServer();
-        if(dataFromServer=="fisier")
+        QStringList tokens=dataFromServer.split(':');
+        if(tokens[0]=="File")
         {
-            QString proba = getPushFromServer();
-            qDebug()<<"S-a primit fisierul"<<proba;
-            //TODO
+            Message *fileMessage =new Message(tokens[2],tokens[1],tokens[3]);
+
+            int fileSize=tokens[4].toInt();
+            QByteArray file= this->socket->read(fileSize);
+            this->socket->waitForReadyRead();
+
+            QFile File(tokens[3]);
+                    if(File.open(QIODevice::WriteOnly))
+                    {
+                        qint64 bytesWritten = File.write(file);
+                        if(bytesWritten == -1)
+                        {
+                            qDebug() << "Error writing file";
+                        }
+                        else
+                        {
+                            qDebug() << "File saved successfully";
+                        }
+                        File.close();
+                    }
+                    else
+                    {
+                        qDebug() << "Error opening file for writing";
+                    }
+
+            this->messages.append(fileMessage);
+            qDebug()<<"S-a primit fisierul"<<tokens[3];
+
         }
-        else
-        {
-            QStringList tokens=dataFromServer.split(':');
-            if(tokens[0]== "Mesaj")
-            {
+        else if(tokens[0]== "Mesaj"){
                 Message *newMessage= new Message(tokens[1],tokens[2],tokens[3]);
                 this->messages.append(newMessage);
                 if( usernameLabel !=nullptr)
                     setMessages();
 
             }
-        }
     }
 
 }

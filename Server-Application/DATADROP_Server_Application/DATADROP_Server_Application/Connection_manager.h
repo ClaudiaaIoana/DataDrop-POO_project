@@ -7,6 +7,7 @@
 #include <winsock2.h>
 #include"ClientSocket.h"
 #include"_IConnection_manager.h"
+#include"File.h"
 
 class Connection_manager:public _IConnection_manager
 {
@@ -28,6 +29,9 @@ private:
 	bool						add_friend(std::string user1, std::string user2);
 	SOCKET						is_connected(std::string receiver);
 	void						send_messages_at_connection(SOCKET clientSocket, std::string sender);
+	void						send_message_for_connected_user(SOCKET receiver, std::string sender, std::string receiver_username, std::string message_content);
+	void						send_files_at_connection(SOCKET clientSocket, std::string sender);
+	void						send_files_for_connected_client(SOCKET receiver, File& file);
 public:
 	static						Connection_manager* get_instance();
 	static						void destroy_instance();

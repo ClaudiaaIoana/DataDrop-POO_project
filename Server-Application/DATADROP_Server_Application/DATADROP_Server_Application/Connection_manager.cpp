@@ -57,13 +57,12 @@ void Connection_manager::requests(SOCKET clientSocket)
 		int							messageLength;
 		char						message[2048];
 		std::vector<std::string>	segments;
-		if (recv(clientSocket, buffer, sizeof(buffer), 0))
-		{
-			segments = protocol(buffer);
-			std::cout << "Request received" << std::endl;
+		recv(clientSocket, buffer, sizeof(buffer), 0);
+		segments = protocol(buffer);
+		std::cout << "Request received" << std::endl;
 
-			if (strcmp(buffer ,"")==0)
-				goto Close_socket;
+		if (strcmp(buffer ,""))
+		{ 
 
 			//LOGIN
 			if (segments[0]=="LogIn")
@@ -127,27 +126,38 @@ void Connection_manager::requests(SOCKET clientSocket)
 				SOCKET receiver = is_connected(segments[2]);
 				if (receiver != NULL)
 				{
-
-					strcpy(message, "Mesaj:");
-					strcat(message, segments[1].c_str());
-					strcat(message, ":");
-					strcat(message, segments[2].c_str());
-					strcat(message, ":");
-					strcat(message, segments[3].c_str());
-					strcat(message, "\0");
-
-					uint32_t dimension;
-					dimension = strlen(message);
-					messageLength = strlen(message);
-
-					send(receiver, (char*)&dimension, sizeof(dimension), 0);
-					send(receiver, message, messageLength, 0);
+					this->send_message_for_connected_user(receiver, segments[1], segments[2], segments[3]);
 				}
 				else
 				{
 					DB::get_instance()->push_waiting_message(segments[1], segments[2], segments[3]);
 				}
 			}
+
+			//FILE RECEIVING AND SENDING
+			else if (segments[0] == "File")
+			{
+				int					dimention = std::stoi(segments[4]);
+				char*				content =(char*) calloc(dimention, sizeof(char));
+				SOCKET				receiver = is_connected(segments[2]);
+
+				recv(clientSocket, content, dimention, 0);
+				
+				File file(segments[1], segments[2], segments[3], dimention, content);
+
+				if (receiver != NULL)
+				{
+					std::cout << "SENDING FILE: "<<file.get_name() << std::endl;
+					this->send_files_for_connected_client(receiver, file);
+				}
+				else
+				{
+					std::cout << "STORING FILE IN DATABASE: " << file.get_name() << std::endl;
+					DB::get_instance()->push_waiting_files(file);
+				}
+				free(content);
+			}
+			//CREATE GROUP 
 			else if (segments[0] == "Creare_grup")
 			{
 				DB::get_instance()->create_group_with_members(segments[1], std::vector<std::string>(segments.begin() + 2, segments.end()));
@@ -281,6 +291,49 @@ void Connection_manager::send_messages_at_connection(SOCKET clientSocket, std::s
 		Sleep(100);
 	}
 	DB::get_instance()->delete_sent_messages(username);
+}
+
+void Connection_manager::send_message_for_connected_user(SOCKET receiver, std::string sender, std::string receiver_username, std::string message_content)
+{	
+	char				message[2048];
+	strcpy(message, "Mesaj:");
+	strcat(message, sender.c_str());
+	strcat(message, ":");
+	strcat(message, receiver_username.c_str());
+	strcat(message, ":");
+	strcat(message, message_content.c_str());
+	strcat(message, "\0");
+
+	uint32_t messageLength = strlen(message);
+
+	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
+	send(receiver, message, messageLength, 0);
+}
+
+void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::string sender)
+{
+	//TODO
+}
+
+void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& file)
+{
+	char				message[2048];
+	strcpy(message, "File:");
+	strcat(message, file.get_sender().c_str());
+	strcat(message, ":");
+	strcat(message, file.get_receiver().c_str());
+	strcat(message, ":");
+	strcat(message, file.get_name().c_str());
+	strcat(message, ":");
+	strcat(message, std::to_string(file.get_dimension()).c_str());
+	strcat(message, "\0");
+
+	uint32_t messageLength = strlen(message);
+
+	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
+	send(receiver, message, messageLength, 0);
+	Sleep(10); 
+	send(receiver, file.get_content(), file.get_dimension(), 0);
 }
 
 

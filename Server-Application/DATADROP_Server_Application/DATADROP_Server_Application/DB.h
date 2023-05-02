@@ -1,5 +1,6 @@
 #pragma once
 #include"_IDB.h"
+#include"File.h"
 #include <iostream>
 #include <windows.h>
 #include <sqlext.h>
@@ -33,6 +34,6 @@ public:
 	void													create_group_with_members(std:: string group_name, std::vector<std::string> users);
 	void													create_empty_group(std::string group_name);
 	void													add_member_in_group(std::string group_name,std::string username);
-
+	void													push_waiting_files(File& file);
 };
 

@@ -465,5 +465,63 @@ void DB::add_member_in_group(std::string group_name, std::string username)
     }
 }
 
+void DB::push_waiting_files(File& file)
+{
+    SQLRETURN       retcode;
+    SQLLEN          cbData = 0;
+    std::string     sender=file.get_sender();
+    std::string     receiver=file.get_receiver();
+    std::string     name=file.get_name();
+    int             dimension=file.get_dimension();
+    char*           content=file.get_content();
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"INSERT INTO WaitingFiles (SenderID, ReceiverID, Name, Dimension, File_content) VALUES (?, ?, ?, ?, ?)";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sender.length(), 0, (SQLPOINTER)sender.c_str(), sender.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, name.length(), 0, (SQLPOINTER)name.c_str(), name.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &dimension, 0, NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_BINARY, SQL_LONGVARBINARY, dimension, 0, content, dimension, &cbData);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+        std::cout << "FILE STORED"<<name<<" dimension :"<<dimension << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+
+    free(content);
+}
+
 
 

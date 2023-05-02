@@ -365,7 +365,7 @@ void DB::delete_sent_messages(std::string receiver)
 
     }
 
-    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
 
@@ -377,11 +377,92 @@ void DB::delete_sent_messages(std::string receiver)
     {
         std::cout << "MESSAGES SENT" << std::endl;
     }
+    else if (retcode == 100)
+    {
+        std::cout << "NO MESSAGES LEFT" << std::endl;
+    }
     else {
         //TODO: Handle error
         std::cout << "ERROR WHILE DELETING WAITING MESSAGES" << std::endl;
     }
 
+}
+
+void DB::create_group_with_members(std::string group_name, std::vector<std::string> users)
+{
+    //TODO EXCEPTION
+    this->create_empty_group(group_name);
+    for (auto user = users.begin(); user != users.end(); user++)
+    {
+        this->add_member_in_group(group_name,(*user));
+    }
+}
+
+void DB::create_empty_group(std::string group_name)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"INSERT INTO Groups VALUES ( ? )";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, group_name.length(), 0, (SQLPOINTER)group_name.c_str(), group_name.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "GROUP CREATED" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE CREATING THE GROUP"<< std::endl;
+    }
+}
+
+void DB::add_member_in_group(std::string group_name, std::string username)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"INSERT INTO GroupMembers VALUES((SELECT GroupID  FROM Groups WHERE Name = ?),(SELECT UserID FROM Users WHERE UserName = ?))";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, group_name.length(), 0, (SQLPOINTER)group_name.c_str(), group_name.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "MEMBER ADDED TO"<<group_name << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE ADDING A MEMBER TO "<<group_name << std::endl;
+    }
 }
 
 

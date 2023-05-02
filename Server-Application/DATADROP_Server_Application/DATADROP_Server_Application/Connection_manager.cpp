@@ -1,4 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define CHUNK_SIZE		1024
+
 #include <ws2tcpip.h>
 #include <thread>
 #include "Connection_manager.h"
@@ -6,6 +8,7 @@
 #include"ClientSocket.h"
 
 Connection_manager* Connection_manager::instance = nullptr;
+
 
 Connection_manager::Connection_manager()
 {
@@ -141,15 +144,19 @@ void Connection_manager::requests(SOCKET clientSocket)
 			else if (segments[0] == "File")
 			{
 				int					dimension = std::stoi(segments[4]);
-				char*				content =(char*) calloc(dimension, sizeof(char));
+				char*				content = new char[dimension];
 				SOCKET				receiver = is_connected(segments[2]);
 
-				content[0]='\0';
-				int					aux_dim = dimension;
-				while (aux_dim >= 0)
+				memset(content, 0, dimension);
+
+				int					current_size =0;
+				int					bytes_returned = 0;
+				while (current_size < dimension)
 				{
-					this->receive_file_on_chunks(clientSocket, &content);
-					aux_dim -= 1024;
+					Sleep(10);
+					//this->receive_file_on_chunks(clientSocket, &content,aux_dim);
+					bytes_returned = recv(clientSocket, content + current_size, CHUNK_SIZE, 0);
+					current_size += bytes_returned;
 				}
 				
 				File file(segments[1], segments[2], segments[3], dimension, content);
@@ -158,13 +165,17 @@ void Connection_manager::requests(SOCKET clientSocket)
 				{
 					std::cout << "SENDING FILE: "<<file.get_name() << std::endl;
 					this->send_files_for_connected_client(receiver, file);
+
+					FILE* fout = fopen("Andrei.png", "wb");
+					fwrite(file.get_content(), 1, dimension, fout);
+					fclose(fout);
 				}
 				else
 				{
 					std::cout << "STORING FILE IN DATABASE: " << file.get_name() << std::endl;
 					DB::get_instance()->push_waiting_files(file);
 				}
-				free(content);
+				delete content;
 			}
 			//CREATE GROUP 
 			else if (segments[0] == "Creare_grup")
@@ -319,11 +330,12 @@ void Connection_manager::send_message_for_connected_user(SOCKET receiver, std::s
 	send(receiver, message, messageLength, 0);
 }
 
-void Connection_manager::receive_file_on_chunks(SOCKET client_socket, char** content)
+void Connection_manager::receive_file_on_chunks(SOCKET client_socket, char** content, int& current_size)
 {
-	char			buffer[1024] = "\0";
-	recv(client_socket, buffer, sizeof(buffer), 0);
-	strcat((*content), buffer);
+	int				bytes_returned = 0;
+
+	bytes_returned=recv(client_socket, (*content)+current_size, CHUNK_SIZE, 0);
+	current_size += bytes_returned;
 }
 
 void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::string sender)

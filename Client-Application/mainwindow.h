@@ -31,8 +31,8 @@ private slots:
     void on_SeePassword_pressed();
 
 private:
-    NetworkClient *NetworkManager;
-    Ui::MainWindow *ui;
-    SignUp *SignUpWindow;
+    NetworkClient    *NetworkManager;
+    Ui::MainWindow   *ui;
+    SignUp           *SignUpWindow;
 };
 #endif // MAINWINDOW_H

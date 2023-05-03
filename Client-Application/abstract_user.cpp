@@ -47,6 +47,11 @@ void Abstract_User::_addFriend(QString username)
     string name= username.toStdString();
     this->UsernameFriends.push_back(name);
 }
+ void Abstract_User::_addGroup(QString GroupName)
+ {
+      string name= GroupName.toStdString();
+      this->GroupName.push_back(name);
+ }
 
  void Abstract_User::_clearFriendsList()
  {

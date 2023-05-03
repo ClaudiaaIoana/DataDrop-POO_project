@@ -33,16 +33,16 @@ void AddFriend::on_AddButton_clicked()
         socket->waitForBytesWritten();
         qDebug()<<"S-a trimis mesajul:"<<message;
     }
-    //this->ManagerNetwork->sendToServer(message);
-    //_sleep(1000);
+
     QString response= ManagerNetwork->receiveFromServer();
-    if(response== "Adaugat")
-    {
-    hide();
-    this->myUser->_addFriend(username);
-    AppInterface *newApp=this->appInterface;
-    newApp->show();
+
+    if(response== "Adaugat"){
+         hide();
+         this->myUser->_addFriend(username);
+         AppInterface *newApp=this->appInterface;
+         newApp->show();
     }
+
     if(response == "Respins")
     {
          QMessageBox::warning(this,"Warning","The field is empty!");

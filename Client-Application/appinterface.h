@@ -9,7 +9,6 @@
 #include <string>
 #include <QThread>
 #include "networkclient.h"
-#include "serverlistener.h"
 #include <QObject>
 #include "message.h"
 #include <QListView>
@@ -27,6 +26,7 @@ class AppInterface : public QMainWindow
 public:
     explicit AppInterface(User *user,QWidget *parent = nullptr);
     explicit AppInterface(User *user,QList<Message*> messages,QWidget *parent=nullptr);
+
     void onSearchEnterPressed();
     void setScrollZone();
     void setChatZone(QPushButton *userButton);
@@ -35,13 +35,13 @@ public:
     void setMessages();
     void onButtonClicked();
     void addFriend(QString username);
+
     QString getPushFromServer();
+
     ~AppInterface();
-signals:
-    void sendData(const QByteArray& data);
+
 public slots:
-    void onReadyRead();
-private slots:
+     void onReadyRead();
 
      void on_AddFriendButton_clicked();
 
@@ -51,17 +51,21 @@ private slots:
 
      void on_sendButton_clicked();
 
+     void onButtonClickedGroup();
+
+     void on_pushButton_clicked();
+
 private:
-    QListWidget *listaMesaje;
-    QTcpSocket*socket;
-    NetworkClient *ManagerNetwork;
-    Ui::AppInterface *ui;
-    User *user;
+    QListWidget         *listaMesaje;
+    QTcpSocket          *socket;
+    NetworkClient       *ManagerNetwork;
+    Ui::AppInterface    *ui;
+    User                *user;
     QList<QPushButton*> FriendsList;
-    QList<Message*> messages;
-    QLabel *usernameIcon;
-    QLabel *usernameLabel;
-    QHBoxLayout *topBarArea;
+    QList<Message*>     messages;
+    QLabel              *usernameIcon;
+    QLabel              *usernameLabel;
+    QHBoxLayout         *topBarArea;
 };
 
 #endif // APPINTERFACE_H

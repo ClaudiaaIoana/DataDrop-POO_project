@@ -1,7 +1,6 @@
 #include "appinterface.h"
 #include "ui_appinterface.h"
 #include "addfriend.h"
-#include "serverlistener.h"
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QTextEdit>
@@ -13,8 +12,9 @@
 #include <QtEndian>
 #include <QStandardItemModel>
 #include <QScroller>
+#include <QtGlobal>
 
-#define CHUNK_SIZE 1024
+#define CHUNK_SIZE 12288
 
 AppInterface::AppInterface(User *user,QWidget *parent):
     QMainWindow(parent),
@@ -60,16 +60,11 @@ void AppInterface::setInterface()
     this->topBarArea=nullptr;
     this->usernameLabel=nullptr;
     this->usernameIcon=nullptr;
-
-
-
     setScrollZone();
 
-    for (QPushButton *button : FriendsList)
-    {
+    for (QPushButton *button : FriendsList){
             connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClicked);
     }
-
     connect(ui->Search, &QLineEdit::textChanged, this, &AppInterface::onSearchEnterPressed);
     connect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
     connect(ui->TextLineEdit, &QLineEdit::returnPressed, this, &AppInterface::on_sendButton_clicked);
@@ -384,10 +379,29 @@ void AppInterface::on_CreateGroupButton_clicked()
     {
           scrollLayout->addWidget(button);
     }
+
+    for (QPushButton *button : buttonList)
+    {
+            connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClickedGroup);
+    }
     scrollArea->setWidget(scrollWidget);
     ui->CreateGrup_2->show();
 }
 
+void AppInterface::onButtonClickedGroup()
+{
+    QPushButton *button = qobject_cast<QPushButton *>(sender());
+    QString boxText=ui->label->text();
+    if(boxText.isEmpty())
+    {
+           ui->label->setText(button->text());
+    }
+    else
+    {
+        boxText=boxText+","+button->text();
+        ui->label->setText(boxText);
+    }
+}
 
 void AppInterface::on_AttachButton_clicked()
 {
@@ -401,10 +415,6 @@ void AppInterface::on_AttachButton_clicked()
               return;
           }
 
-
-
-          //this->socket->write("fisier");
-
           QFileInfo fileInfo(file_path);
           QString fileName = fileInfo.fileName();
 
@@ -412,10 +422,6 @@ void AppInterface::on_AttachButton_clicked()
           ControlMessage=ControlMessage+QString::fromStdString(user->_getUsername())+":"+usernameLabel->text()+":"
                   +fileName+":";
 
-          //qint32 fileNameSize =fileName.size();
-
-          //this->socket->write((char*)&fileNameSize, sizeof(qint32));
-          //this->socket->write(fileName.toUtf8());
           qint32 fileSize = file.size();
           qDebug() << "File size: " << fileSize;
 
@@ -456,33 +462,42 @@ void AppInterface::onReadyRead()
         if(tokens[0]=="File")
         {
             Message *fileMessage =new Message(tokens[2],tokens[1],tokens[3]);
+            qint32 fileSize=tokens[4].toInt();
+            int numberOfChunks = 0;
+             QByteArray file;
 
-            int fileSize=tokens[4].toInt();
-            QByteArray file= this->socket->read(fileSize);
-           // this->socket->waitForReadyRead();
+           while (file.size() < fileSize) {
+                QByteArray chunk;
+                if(this->socket->waitForReadyRead())
+                    chunk = socket->read(qMin(qint32(fileSize - file.size()), qint32(CHUNK_SIZE)));
 
-            QFile File(tokens[3]);
-                    if(File.open(QIODevice::WriteOnly))
-                    {
-                        qint64 bytesWritten = File.write(file);
-                        if(bytesWritten == -1)
-                        {
-                            qDebug() << "Error writing file";
-                        }
-                        else
-                        {
-                            qDebug() << "File saved successfully";
-                        }
-                        File.close();
-                    }
-                    else
-                    {
-                        qDebug() << "Error opening file for writing";
-                    }
+                if (chunk.isEmpty()) {
+                    qDebug() << "Eroare la citirea din socket:" << socket->errorString();
+                    break;
+                }
+                file.append(chunk);
+                qDebug() << "Numarul de chunk uri" << file.size();
+                numberOfChunks++;
+            }
+            QByteArray chunk= this->socket->read(fileSize-file.size());
+            file.append(chunk);
+            qDebug() << "Numarul de chunk uri" << file.size();
+            qDebug()<<"Numarul de chunker uir"<<file.size();
+
+           QString downloadsDir = QDir::toNativeSeparators(QDir::homePath() + "/Downloads");
+           QFile fileWriter(downloadsDir + "/" + tokens[3]);
+            if (fileWriter.open(QIODevice::WriteOnly)) {
+                fileWriter.write(file);
+                fileWriter.close();
+                qDebug() << "Fișierul a fost scris cu succes în " << tokens[3];
+            } else {
+                qDebug() << "Eroare la deschiderea fișierului pentru scriere" << tokens[3];
+            }
 
             this->messages.append(fileMessage);
-            qDebug()<<"S-a primit fisierul"<<tokens[3];
-
+            if( usernameLabel !=nullptr)
+                setMessages();
+            qDebug() << "S-a primit fișierul" << tokens[3];
         }
         else if(tokens[0]== "Mesaj"){
                 Message *newMessage= new Message(tokens[1],tokens[2],tokens[3]);
@@ -516,4 +531,27 @@ void AppInterface::on_sendButton_clicked()
 }
 
 
+
+
+void AppInterface::on_pushButton_clicked()
+{
+    QString ListMembers=ui->label->text();
+    ListMembers.replace(",",":");
+    QString GroupName=ui->NameGroup->text();
+    QString RequestToGroup="Creare_grup:"+GroupName+":"+ListMembers+":"+QString::fromStdString(user->_getUsername());
+
+    socket->write(RequestToGroup.toUtf8());
+    socket->waitForBytesWritten();
+    qDebug()<<"S-a trimis mesajul:"<<RequestToGroup;
+
+    user->_addGroup(GroupName);
+
+    ui->CreateGrup_2->hide();
+
+    this->hide();
+
+    AppInterface *newApp=new AppInterface(user);
+    newApp->show();
+
+}
 

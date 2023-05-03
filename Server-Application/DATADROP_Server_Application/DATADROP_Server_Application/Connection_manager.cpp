@@ -355,7 +355,16 @@ void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::stri
 		send(clientSocket, (char*)&dimension, sizeof(dimension), 0);
 		send(clientSocket, message, messageLength, 0);
 		Sleep(10);
-		send(clientSocket, (*it).second, (*it).first.get_dimension(), 0);
+		//send(clientSocket, (*it).second, (*it).first.get_dimension(), 0);
+		int						sent = 0;
+		while (sent < (*it).first.get_dimension())
+		{
+			Sleep(10);
+			int			bytesToSend = min(1024 * 3, (*it).first.get_dimension() - sent);
+			send(clientSocket, (*it).second + sent, bytesToSend, 0);
+			sent += 1024 * 3;
+
+		}
 
 		//TODO ERASE
 		FILE* fout = fopen((*it).first.get_name().c_str(), "wb");
@@ -383,7 +392,16 @@ void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& 
 	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
 	send(receiver, message, messageLength, 0);
 	Sleep(10); 
-	send(receiver, content, file.get_dimension(), 0);
+
+	int						sent = 0;
+	while (sent < file.get_dimension())
+	{
+		Sleep(10);
+		int			bytesToSend = min(1024*3, file.get_dimension()-sent);
+		send(receiver, content+sent, bytesToSend, 0);
+		sent += 1024 * 3;
+
+	}
 }
 
 

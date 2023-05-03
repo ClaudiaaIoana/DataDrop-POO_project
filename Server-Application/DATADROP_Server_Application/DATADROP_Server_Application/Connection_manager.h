@@ -30,9 +30,8 @@ private:
 	SOCKET						is_connected(std::string receiver);
 	void						send_messages_at_connection(SOCKET clientSocket, std::string sender);
 	void						send_message_for_connected_user(SOCKET receiver, std::string sender, std::string receiver_username, std::string message_content);
-	void						receive_file_on_chunks(SOCKET client_socket,char** content,int & current_size);
-	void						send_files_at_connection(SOCKET clientSocket, std::string sender);
-	void						send_files_for_connected_client(SOCKET receiver, File& file);
+	void						send_files_at_connection(SOCKET clientSocket, std::string receiver);
+	void						send_files_for_connected_client(SOCKET receiver, File& file, char* contennt);
 public:
 	static						Connection_manager* get_instance();
 	static						void destroy_instance();

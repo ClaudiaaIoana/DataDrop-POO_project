@@ -95,6 +95,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 
 					Sleep(10);
 					send_messages_at_connection(clientSocket, segments[1]);
+					send_files_at_connection(clientSocket, segments[1]);
 				}
 				else
 				{
@@ -154,26 +155,22 @@ void Connection_manager::requests(SOCKET clientSocket)
 				while (current_size < dimension)
 				{
 					Sleep(10);
-					//this->receive_file_on_chunks(clientSocket, &content,aux_dim);
 					bytes_returned = recv(clientSocket, content + current_size, CHUNK_SIZE, 0);
 					current_size += bytes_returned;
 				}
 				
-				File file(segments[1], segments[2], segments[3], dimension, content);
+				File file(segments[1], segments[2], segments[3], dimension);
 
 				if (receiver != NULL)
 				{
 					std::cout << "SENDING FILE: "<<file.get_name() << std::endl;
-					this->send_files_for_connected_client(receiver, file);
+					this->send_files_for_connected_client(receiver, file,content);
 
-					FILE* fout = fopen("Andrei.png", "wb");
-					fwrite(file.get_content(), 1, dimension, fout);
-					fclose(fout);
 				}
 				else
 				{
 					std::cout << "STORING FILE IN DATABASE: " << file.get_name() << std::endl;
-					DB::get_instance()->push_waiting_files(file);
+					DB::get_instance()->push_waiting_files(file,content);
 				}
 				delete content;
 			}
@@ -330,20 +327,45 @@ void Connection_manager::send_message_for_connected_user(SOCKET receiver, std::s
 	send(receiver, message, messageLength, 0);
 }
 
-void Connection_manager::receive_file_on_chunks(SOCKET client_socket, char** content, int& current_size)
-{
-	int				bytes_returned = 0;
-
-	bytes_returned=recv(client_socket, (*content)+current_size, CHUNK_SIZE, 0);
-	current_size += bytes_returned;
-}
-
-void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::string sender)
+void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::string receiver)
 {
 	//TODO
+	std::vector<std::pair<File, char*>>				 whole_file;
+	char											 message[1024];
+	int												 messageLength;
+	whole_file = DB::get_instance()->pop_waiting_files(receiver);
+
+	for (auto it = whole_file.begin(); it != whole_file.end(); it++)
+	{
+		message[0] = '\0';
+		strcpy(message, "File:");
+		strcat(message, (*it).first.get_sender().c_str());
+		strcat(message, ":");
+		strcat(message, (*it).first.get_receiver().c_str());
+		strcat(message, ":");
+		strcat(message, (*it).first.get_name().c_str());
+		strcat(message, ":");
+		strcat(message, std::to_string((*it).first.get_dimension()).c_str());
+		strcat(message, "\0");
+
+		uint32_t dimension;
+		dimension = strlen(message);
+		messageLength = strlen(message);
+
+		send(clientSocket, (char*)&dimension, sizeof(dimension), 0);
+		send(clientSocket, message, messageLength, 0);
+		Sleep(10);
+		send(clientSocket, (*it).second, (*it).first.get_dimension(), 0);
+
+		//TODO ERASE
+		FILE* fout = fopen((*it).first.get_name().c_str(), "wb");
+		fwrite((*it).second, 1, (*it).first.get_dimension(), fout);
+		fclose(fout);
+	}
+	//TODO DELETE 
 }
 
-void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& file)
+void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& file, char* content)
 {
 	char				message[2048];
 	strcpy(message, "File:");
@@ -361,7 +383,7 @@ void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& 
 	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
 	send(receiver, message, messageLength, 0);
 	Sleep(10); 
-	send(receiver, file.get_content(), file.get_dimension(), 0);
+	send(receiver, content, file.get_dimension(), 0);
 }
 
 

@@ -34,6 +34,7 @@ public:
 	void													create_group_with_members(std:: string group_name, std::vector<std::string> users);
 	void													create_empty_group(std::string group_name);
 	void													add_member_in_group(std::string group_name,std::string username);
-	void													push_waiting_files(File& file);
+	void													push_waiting_files(File& file, char* content);
+	std::vector<std::pair<File , char* >>					pop_waiting_files(std::string receiver);
 };
 

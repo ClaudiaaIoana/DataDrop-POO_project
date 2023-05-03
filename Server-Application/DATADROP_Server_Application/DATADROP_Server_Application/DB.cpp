@@ -1,4 +1,7 @@
 #include "DB.h"
+#include<stdlib.h>
+
+#define MAX_BINARY_SIZE         (2^31-1)  
 
 DB* DB::instance = nullptr;
 
@@ -465,20 +468,19 @@ void DB::add_member_in_group(std::string group_name, std::string username)
     }
 }
 
-void DB::push_waiting_files(File& file)
+void DB::push_waiting_files(File& file, char* content)
 {
     SQLRETURN       retcode;
-    SQLLEN          cbData = 0;
     std::string     sender=file.get_sender();
     std::string     receiver=file.get_receiver();
     std::string     name=file.get_name();
     int             dimension=file.get_dimension();
-    char*           content=file.get_content();
+    SQLLEN          cbData = dimension;
 
     resetHanddle();
 
     // Prepare SQL statement
-    SQLWCHAR* QUERY = (SQLWCHAR*)L"INSERT INTO WaitingFiles (SenderID, ReceiverID, Name, Dimension, File_content) VALUES (?, ?, ?, ?, ?)";
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"exec insert_file_user_user  @Sender = ? , @Receiver = ? , @Name = ? , @Dimension = ? , @Content = ?";
     retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
@@ -505,7 +507,7 @@ void DB::push_waiting_files(File& file)
         //TODO: Handle error
     }
 
-    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_BINARY, SQL_LONGVARBINARY, dimension, 0, content, dimension, &cbData);
+    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_BINARY, SQL_LONGVARBINARY, dimension, 0,(SQLPOINTER) content, 0, &cbData);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
     }
@@ -520,7 +522,63 @@ void DB::push_waiting_files(File& file)
         std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
     }
 
-    free(content);
+    //free(content);
+}
+
+std::vector<std::pair<File, char*>> DB::pop_waiting_files(std::string receiver)
+{
+    std::vector<std::pair<File, char*>>        whole_file;
+    SQLRETURN                                  retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"SELECT U2.UserName, WF.Name, WF.Dimention, WF.File_content FROM WaitingFiles AS WF INNER JOIN Users AS U1 ON U1.UserID = WF.ReceiverID INNER JOIN Users AS U2 ON U2.UserID = WF.SenderID WHERE U1.UserName = ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+
+        SQLCHAR sqlSender[SQL_RESULT_LEN];
+        SQLLEN ptrSqlSender;
+        SQLCHAR sqlName[SQL_RESULT_LEN];
+        SQLLEN ptrSqlName;
+        SQLINTEGER Dimension;
+        SQLCHAR* binaryVal;
+        SQLLEN binaryValLen;
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            SQLGetData(hstmt, 1, SQL_CHAR, sqlSender, SQL_RESULT_LEN, &ptrSqlSender);
+            SQLGetData(hstmt, 2, SQL_CHAR, sqlName, SQL_RESULT_LEN, &ptrSqlName);
+            SQLGetData(hstmt, 3, SQL_C_LONG, &Dimension, 0, NULL);
+            binaryVal = new SQLCHAR[Dimension];
+            SQLGetData(hstmt, 4, SQL_C_BINARY, binaryVal, Dimension, &binaryValLen);
+            whole_file.push_back(std::make_pair(File((char*)sqlSender,receiver,(char*)sqlName,(int)Dimension), (char*)binaryVal));
+
+        }
+
+        std::cout << "SENDING FILES TO " << receiver << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE SENDING MESSAGE" << std::endl;
+    }
+
+    return whole_file;
 }
 
 

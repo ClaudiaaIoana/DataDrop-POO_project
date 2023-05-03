@@ -6,7 +6,7 @@
 #include <QStringView>
 #include <QStringTokenizer>
 #include <QtCore>
-#include "serverlistener.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -37,8 +37,10 @@ void MainWindow::on_ButtonLogIn_clicked()
        QString message="LogIn:"+username+":"+password;
 
        this->NetworkManager->sendToServer(message);
+
        QString checkLoggerAndFriendsList=this->NetworkManager->receiveFromServer();
        QStringList tokens = checkLoggerAndFriendsList.split(':');
+
        if(tokens[0] == "Corect")
        {
             hide();

@@ -8,15 +8,17 @@ class NetworkClient
 {
 private:
     static NetworkClient *instance;
-    QTcpSocket *socket;
-    QMutex *mutex;
+    QTcpSocket           *socket;
+    QMutex               *mutex;
     NetworkClient();
 public:
     void disconectSocket();
     static NetworkClient* getInstance();
+
     void connect(const QString& host, quint16 port);
     void sendToServer(const QString message);
     void sendFile(const QString &filePath);
+
     QString receiveFromServer();
     QTcpSocket *getSocket();
     QMutex * getMutex();

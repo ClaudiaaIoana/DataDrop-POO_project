@@ -397,6 +397,69 @@ cursor: pointer;
        </property>
       </widget>
      </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>100</y>
+        <width>261</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 10px;
+font: italic 9pt &quot;Segoe UI&quot;;
+color:	#1E90FF; 
+</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="NameGroup">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>151</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 10px;
+font: italic 9pt &quot;Segoe UI&quot;;
+background-color: rgb(245,245,245);
+color:	#1E90FF; </string>
+      </property>
+      <property name="placeholderText">
+       <string>    Name Your Group</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>50</y>
+        <width>83</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">#pushButton{
+  background-color: white; 
+  color: black; 
+  border: 2px solid #4CAF50;
+}
+
+#pushButton:hover {
+  background-color: #4CAF50;
+  color: white;
+}</string>
+      </property>
+      <property name="text">
+       <string>Finish</string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>

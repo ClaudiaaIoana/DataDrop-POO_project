@@ -18,7 +18,6 @@ SOURCES += \
     mainwindow.cpp \
     message.cpp \
     networkclient.cpp \
-    serverlistener.cpp \
     signup.cpp \
     user.cpp
 
@@ -30,7 +29,6 @@ HEADERS += \
     mainwindow.h \
     message.h \
     networkclient.h \
-    serverlistener.h \
     signup.h \
     user.h
 

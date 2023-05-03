@@ -2,7 +2,7 @@
 #include <qdebug.h>
 #include <QFile>
 #include <QFileInfo>
-#include "serverlistener.h"
+
 
 NetworkClient* NetworkClient::instance = nullptr;
 
@@ -10,6 +10,7 @@ NetworkClient* NetworkClient::instance = nullptr;
 NetworkClient::NetworkClient()
 {
     this->socket=new QTcpSocket();
+    this->socket->setReadBufferSize(1024 * 1024 * 1024);
     this->mutex=new QMutex();
 }
 

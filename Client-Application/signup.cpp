@@ -28,7 +28,6 @@ bool SignUp::_checkPassword(QString password, QString ConfirmPassword) const
             numberDigit++;
         if((*it)>='A' and (*it)<='Z')
             numberUpper++;
-
     }
 
     if(password.length()<8 or numberDigit == 0 or numberDigit == 0)

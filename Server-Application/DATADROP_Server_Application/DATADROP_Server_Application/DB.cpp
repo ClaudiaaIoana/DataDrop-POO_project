@@ -20,7 +20,8 @@ DB::DB()
     retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
 
     // Connect to the SQL Server database
-    SQLWCHAR* dsn = (SQLWCHAR*)L"DRIVER={SQL Server};SERVER=DESKTOP-0AQ7BL5;DATABASE=DataDrop;Trusted=true;";
+    //SQLWCHAR* dsn = (SQLWCHAR*)L"DRIVER={SQL Server};SERVER=DESKTOP-0AQ7BL5;DATABASE=DataDrop;Trusted=true;";
+    SQLWCHAR* dsn = (SQLWCHAR*)L"DRIVER={SQL Server};SERVER=DESKTOP-JFOHFRF;DATABASE=DataDrop;Trusted=true;";
     switch (SQLDriverConnect(hdbc,
         NULL,
         dsn,

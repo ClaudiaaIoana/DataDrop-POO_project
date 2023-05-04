@@ -38,7 +38,7 @@ void AddFriend::on_AddButton_clicked()
     if(response== "Adaugat"){
          hide();
          this->myUser->_addFriend(username);
-         AppInterface *newApp=new AppInterface(myUsername);
+         AppInterface *newApp=new AppInterface(myUser);
          newApp->show();
     }
 

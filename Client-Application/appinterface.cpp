@@ -21,8 +21,6 @@ AppInterface::AppInterface(User *user,QWidget *parent):
     ui(new Ui::AppInterface)
 {
     ui->setupUi(this);
-
-
     this->user=user;
     this->ManagerNetwork=NetworkClient::getInstance();
     this->socket=ManagerNetwork->getSocket();
@@ -437,6 +435,10 @@ void AppInterface::on_AttachButton_clicked()
           out.writeRawData(data.constData(), data.size());
           qDebug() << "Sent " << data.size() << " bytes.";
 
+          Message *newMessage=new Message(QString::fromStdString(user->_getUsername()),usernameLabel->text(),fileName);
+          this->messages.append(newMessage);
+          setMessages();
+
           file.close();
     }
 
@@ -461,12 +463,12 @@ void AppInterface::onReadyRead()
         QStringList tokens=dataFromServer.split(':');
         if(tokens[0]=="File")
         {
-            Message *fileMessage =new Message(tokens[2],tokens[1],tokens[3]);
+            Message *fileMessage =new Message(tokens[1],tokens[2],tokens[3]);
             qint32 fileSize=tokens[4].toInt();
             int numberOfChunks = 0;
-             QByteArray file;
+            QByteArray file;
 
-           while (file.size() < fileSize) {
+            while (file.size() < fileSize) {
                 QByteArray chunk;
                 if(this->socket->waitForReadyRead())
                     chunk = socket->read(qMin(qint32(fileSize - file.size()), qint32(CHUNK_SIZE)));
@@ -484,8 +486,8 @@ void AppInterface::onReadyRead()
             qDebug() << "Numarul de chunk uri" << file.size();
             qDebug()<<"Numarul de chunker uir"<<file.size();
 
-           QString downloadsDir = QDir::toNativeSeparators(QDir::homePath() + "/Downloads");
-           QFile fileWriter(downloadsDir + "/" + tokens[3]);
+            QString downloadsDir = QDir::toNativeSeparators(QDir::homePath() + "/Downloads");
+            QFile fileWriter(downloadsDir + "/" + tokens[3]);
             if (fileWriter.open(QIODevice::WriteOnly)) {
                 fileWriter.write(file);
                 fileWriter.close();
@@ -500,12 +502,12 @@ void AppInterface::onReadyRead()
             qDebug() << "S-a primit fișierul" << tokens[3];
         }
         else if(tokens[0]== "Mesaj"){
-                Message *newMessage= new Message(tokens[1],tokens[2],tokens[3]);
-                this->messages.append(newMessage);
-                if( usernameLabel !=nullptr)
-                    setMessages();
+            Message *newMessage= new Message(tokens[1],tokens[2],tokens[3]);
+            this->messages.append(newMessage);
+            if( usernameLabel !=nullptr)
+                setMessages();
 
-            }
+        }
     }
 
 }

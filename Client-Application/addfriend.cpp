@@ -13,7 +13,6 @@ AddFriend::AddFriend(User *user,AppInterface *app,QWidget *parent) :
     ui->lineUser->setPlaceholderText("  Type...");
     this->ManagerNetwork=NetworkClient::getInstance();
     this->socket=ManagerNetwork->getSocket();
-    //connect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
 }
 
 AddFriend::~AddFriend()
@@ -39,7 +38,7 @@ void AddFriend::on_AddButton_clicked()
     if(response== "Adaugat"){
          hide();
          this->myUser->_addFriend(username);
-         AppInterface *newApp=this->appInterface;
+         AppInterface *newApp=new AppInterface(myUsername);
          newApp->show();
     }
 

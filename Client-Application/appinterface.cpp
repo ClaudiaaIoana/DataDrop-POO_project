@@ -61,7 +61,7 @@ void AppInterface::setInterface()
     setScrollZone();
 
     for (QPushButton *button : FriendsList){
-            connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClicked);
+        connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClicked);
     }
     connect(ui->Search, &QLineEdit::textChanged, this, &AppInterface::onSearchEnterPressed);
     connect(socket,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
@@ -110,63 +110,63 @@ void AppInterface::setScrollZone()
     QList<QPushButton*> buttonList;
 
     for (int i = 0; i < this->user->_getSizeFriendBuffer(); ++i) {
-            QString usernameIndexName=QString::fromStdString(user->_getUsernameIndex(i));
-            QPushButton *button = new QPushButton(usernameIndexName);
-            QIcon icon(":/man_person.png"); // încărcați imaginea utilizatorului dintr-un fișier
-            button->setIcon(icon);
-            button->setIconSize(QSize(32, 32));
-            button->setStyleSheet("QPushButton {"
-                                      "border: none;"
-                                      "background-color: transparent;"
-                                      "color: #1E90FF;"
-                                      "padding: 8px 16px;"
-                                      "font-family: Arial, sans-serif;"
-                                      "font-size: 14px;"
-                                      "font-weight: bold;"
-                                      "text-align: left;"
-                                      "text-transform: none;"
-                                      "border-radius: 12px;"
-                                  "}"
-                                  "QPushButton:hover {"
-                                      "background-color: rgba(0, 0, 0, 0.05);"
-                                  "}"
-                                  "QPushButton:pressed {"
-                                      "background-color: rgba(0, 0, 0, 0.1);"
-                                  "}");
-            button->setProperty("tipButon", "persoana");
-            buttonList.append(button);
-        }
+        QString usernameIndexName=QString::fromStdString(user->_getUsernameIndex(i));
+        QPushButton *button = new QPushButton(usernameIndexName);
+        QIcon icon(":/man_person.png"); // încărcați imaginea utilizatorului dintr-un fișier
+        button->setIcon(icon);
+        button->setIconSize(QSize(32, 32));
+        button->setStyleSheet("QPushButton {"
+                              "border: none;"
+                              "background-color: transparent;"
+                              "color: #1E90FF;"
+                              "padding: 8px 16px;"
+                              "font-family: Arial, sans-serif;"
+                              "font-size: 14px;"
+                              "font-weight: bold;"
+                              "text-align: left;"
+                              "text-transform: none;"
+                              "border-radius: 12px;"
+                              "}"
+                              "QPushButton:hover {"
+                              "background-color: rgba(0, 0, 0, 0.05);"
+                              "}"
+                              "QPushButton:pressed {"
+                              "background-color: rgba(0, 0, 0, 0.1);"
+                              "}");
+        button->setProperty("tipButon", "persoana");
+        buttonList.append(button);
+    }
     for (int i = 0; i < this->user->_getSizeGroups(); ++i) {
-            QString GroupIndexName=QString::fromStdString(user->_getGroupIndex(i));
-            QPushButton *button = new QPushButton(GroupIndexName);
-            QIcon icon(":/teamwork.png");
-            button->setIcon(icon);
-            button->setIconSize(QSize(32, 32));
-            button->setStyleSheet("QPushButton {"
-                                      "border: none;"
-                                      "background-color: transparent;"
-                                      "color: #1E90FF;"
-                                      "padding: 8px 16px;"
-                                      "font-family: Arial, sans-serif;"
-                                      "font-size: 14px;"
-                                      "font-weight: bold;"
-                                      "text-align: left;"
-                                      "text-transform: none;"
-                                      "border-radius: 12px;"
-                                  "}"
-                                  "QPushButton:hover {"
-                                      "background-color: rgba(0, 0, 0, 0.05);"
-                                  "}"
-                                  "QPushButton:pressed {"
-                                      "background-color: rgba(0, 0, 0, 0.1);"
-                                  "}");
-            button->setProperty("tipButon", "grup");
-            buttonList.append(button);
-        }
+        QString GroupIndexName=QString::fromStdString(user->_getGroupIndex(i));
+        QPushButton *button = new QPushButton(GroupIndexName);
+        QIcon icon(":/teamwork.png");
+        button->setIcon(icon);
+        button->setIconSize(QSize(32, 32));
+        button->setStyleSheet("QPushButton {"
+                              "border: none;"
+                              "background-color: transparent;"
+                              "color: #1E90FF;"
+                              "padding: 8px 16px;"
+                              "font-family: Arial, sans-serif;"
+                              "font-size: 14px;"
+                              "font-weight: bold;"
+                              "text-align: left;"
+                              "text-transform: none;"
+                              "border-radius: 12px;"
+                              "}"
+                              "QPushButton:hover {"
+                              "background-color: rgba(0, 0, 0, 0.05);"
+                              "}"
+                              "QPushButton:pressed {"
+                              "background-color: rgba(0, 0, 0, 0.1);"
+                              "}");
+        button->setProperty("tipButon", "grup");
+        buttonList.append(button);
+    }
     this->FriendsList=buttonList;
     for (QPushButton *button : buttonList) {
-          scrollLayout->addWidget(button);
-      }
+        scrollLayout->addWidget(button);
+    }
 }
 
 void AppInterface::setChatZone(QPushButton *userButton)
@@ -195,9 +195,9 @@ void AppInterface::setChatZone(QPushButton *userButton)
     if(userButton->property("tipButon").toString()=="persoana")
     {
 
-    QPixmap pixmap(":/man_person.png");
-    QPixmap scaledPixmap = pixmap.scaled(32, 32, Qt::KeepAspectRatio);
-    usernameIcon->setPixmap(scaledPixmap);
+        QPixmap pixmap(":/man_person.png");
+        QPixmap scaledPixmap = pixmap.scaled(32, 32, Qt::KeepAspectRatio);
+        usernameIcon->setPixmap(scaledPixmap);
 
     }
     else if(userButton->property("tipButon").toString() == "grup")
@@ -230,63 +230,63 @@ void AppInterface::setChatZone(QPushButton *userButton)
 
 void AppInterface::setMessages()
 {
-       ui->listaMesaje->clear();
-       ui->listaMesaje->setFixedSize(441, 401);
-       ui->listaMesaje->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-       QString scrollBarStyle = "QScrollBar:vertical {"
-                                "background-color: #F4F4F4;"
-                                "width: 12px;"
-                                "margin: 0px;"
-                                "}"
-                                "QScrollBar::handle:vertical {"
-                                "background-color: #DADADA;"
-                                "min-height: 20px;"
-                                "border-radius: 5px;"
-                                "}"
-                                "QScrollBar::handle:hover:vertical {"
-                                "background-color: #C1C1C1;"
-                                "}"
-                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,"
-                                "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
-                                "background-color: #F4F4F4;"
-                                "}";
-       ui->listaMesaje->verticalScrollBar()->setStyleSheet(scrollBarStyle);
-       ui->listaMesaje->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-            for(int i=0; i<messages.size(); i++)
-            {
-                if(messages[i]->getSender() == usernameLabel->text() && messages[i]->getReceiver() == QString::fromStdString(user->_getUsername()))
-                {
-                    QListWidgetItem *message = new QListWidgetItem(messages[i]->getContentMessage());
-                    QPixmap image(":/man_person.png");
-                    QFont font;
-                    font.setPointSize(12);
-                    message->setFont(font);
-                    QPixmap scaledImage = image.scaled(QSize(50, 50));
-                    message->setIcon(QIcon(scaledImage));
-                    message->setTextAlignment(Qt::AlignLeft);
-                    ui->listaMesaje->addItem(message);
-                }
-                if(messages[i]->getSender() == QString::fromStdString(user->_getUsername()) && messages[i]->getReceiver() == usernameLabel->text())
-                {
-                    QListWidgetItem *message = new QListWidgetItem(messages[i]->getContentMessage());
-                    message->setTextAlignment(Qt::AlignRight);
-                    QFont font;
-                    font.setPointSize(12);
-                    message->setFont(font);
-                    ui->listaMesaje->addItem(message);
-                }
-            }
+    ui->listaMesaje->clear();
+    ui->listaMesaje->setFixedSize(441, 401);
+    ui->listaMesaje->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    QString scrollBarStyle = "QScrollBar:vertical {"
+                             "background-color: #F4F4F4;"
+                             "width: 12px;"
+                             "margin: 0px;"
+                             "}"
+                             "QScrollBar::handle:vertical {"
+                             "background-color: #DADADA;"
+                             "min-height: 20px;"
+                             "border-radius: 5px;"
+                             "}"
+                             "QScrollBar::handle:hover:vertical {"
+                             "background-color: #C1C1C1;"
+                             "}"
+                             "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,"
+                             "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+                             "background-color: #F4F4F4;"
+                             "}";
+    ui->listaMesaje->verticalScrollBar()->setStyleSheet(scrollBarStyle);
+    ui->listaMesaje->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    for(int i=0; i<messages.size(); i++)
+    {
+        if(messages[i]->getSender() == usernameLabel->text() && messages[i]->getReceiver() == QString::fromStdString(user->_getUsername()))
+        {
+            QListWidgetItem *message = new QListWidgetItem(messages[i]->getContentMessage());
+            QPixmap image(":/man_person.png");
+            QFont font;
+            font.setPointSize(12);
+            message->setFont(font);
+            QPixmap scaledImage = image.scaled(QSize(50, 50));
+            message->setIcon(QIcon(scaledImage));
+            message->setTextAlignment(Qt::AlignLeft);
+            ui->listaMesaje->addItem(message);
+        }
+        if(messages[i]->getSender() == QString::fromStdString(user->_getUsername()) && messages[i]->getReceiver() == usernameLabel->text())
+        {
+            QListWidgetItem *message = new QListWidgetItem(messages[i]->getContentMessage());
+            message->setTextAlignment(Qt::AlignRight);
+            QFont font;
+            font.setPointSize(12);
+            message->setFont(font);
+            ui->listaMesaje->addItem(message);
+        }
+    }
 
-            ui->listaMesaje->scrollToBottom(); // deruleaza lista la ultimul element
+    ui->listaMesaje->scrollToBottom();
 
 }
 
 
 
- void AppInterface::addFriend(QString username)
- {
-     this->user->_addFriend(username);
- }
+void AppInterface::addFriend(QString username)
+{
+    this->user->_addFriend(username);
+}
 
 void AppInterface::onSearchEnterPressed()
 {
@@ -294,17 +294,17 @@ void AppInterface::onSearchEnterPressed()
     QString searchText = ui->Search->text();
 
     for (QPushButton *button : FriendsList) {
-           QString buttonText = button->text();
+        QString buttonText = button->text();
 
-           if (buttonText.contains(searchText, Qt::CaseInsensitive))
-           {
-               button->setVisible(true);
-           }
-           else
-           {
-               button->setVisible(false);
-           }
-       }
+        if (buttonText.contains(searchText, Qt::CaseInsensitive))
+        {
+            button->setVisible(true);
+        }
+        else
+        {
+            button->setVisible(false);
+        }
+    }
 
 }
 
@@ -346,41 +346,41 @@ void AppInterface::on_CreateGroupButton_clicked()
     QList<QPushButton*> buttonList;
 
     for (int i = 0; i < this->user->_getSizeFriendBuffer(); ++i) {
-            QString usernameIndexName=QString::fromStdString(user->_getUsernameIndex(i));
-            QPushButton *button = new QPushButton(usernameIndexName);
-            QIcon icon(":/man_person.png"); // încărcați imaginea utilizatorului dintr-un fișier
-            button->setIcon(icon);
-            button->setIconSize(QSize(25, 25));
-            button->setStyleSheet("QPushButton {"
-                                      "border: none;"
-                                      "background-color: transparent;"
-                                      "color: #1E90FF;"
-                                      "padding: 8px 16px;"
-                                      "font-family: Arial, sans-serif;"
-                                      "font-size: 14px;"
-                                      "font-weight: bold;"
-                                      "text-align: left;"
-                                      "text-transform: none;"
-                                      "border-radius: 12px;"
-                                  "}"
-                                  "QPushButton:hover {"
-                                      "background-color: rgba(0, 0, 0, 0.05);"
-                                  "}"
-                                  "QPushButton:pressed {"
-                                      "background-color: rgba(0, 0, 0, 0.1);"
-                                  "}");
-            button->setProperty("tipButon", "persoana");
-            buttonList.append(button);
-        }
+        QString usernameIndexName=QString::fromStdString(user->_getUsernameIndex(i));
+        QPushButton *button = new QPushButton(usernameIndexName);
+        QIcon icon(":/man_person.png"); // încărcați imaginea utilizatorului dintr-un fișier
+        button->setIcon(icon);
+        button->setIconSize(QSize(25, 25));
+        button->setStyleSheet("QPushButton {"
+                              "border: none;"
+                              "background-color: transparent;"
+                              "color: #1E90FF;"
+                              "padding: 8px 16px;"
+                              "font-family: Arial, sans-serif;"
+                              "font-size: 14px;"
+                              "font-weight: bold;"
+                              "text-align: left;"
+                              "text-transform: none;"
+                              "border-radius: 12px;"
+                              "}"
+                              "QPushButton:hover {"
+                              "background-color: rgba(0, 0, 0, 0.05);"
+                              "}"
+                              "QPushButton:pressed {"
+                              "background-color: rgba(0, 0, 0, 0.1);"
+                              "}");
+        button->setProperty("tipButon", "persoana");
+        buttonList.append(button);
+    }
 
     for (QPushButton *button :buttonList)
     {
-          scrollLayout->addWidget(button);
+        scrollLayout->addWidget(button);
     }
 
     for (QPushButton *button : buttonList)
     {
-            connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClickedGroup);
+        connect(button, &QPushButton::clicked, this, &AppInterface::onButtonClickedGroup);
     }
     scrollArea->setWidget(scrollWidget);
     ui->CreateGrup_2->show();
@@ -392,7 +392,7 @@ void AppInterface::onButtonClickedGroup()
     QString boxText=ui->label->text();
     if(boxText.isEmpty())
     {
-           ui->label->setText(button->text());
+        ui->label->setText(button->text());
     }
     else
     {
@@ -406,40 +406,40 @@ void AppInterface::on_AttachButton_clicked()
     QString file_path = QFileDialog::getOpenFileName(this, "Selectați un fișier", "", "Toate fișierele (*.*)");
     if (!file_path.isEmpty())
     {
-          QFile file(file_path);
-          if (!file.open(QIODevice::ReadOnly))
-          {
-              qDebug()<<"Failed to open file";
-              return;
-          }
+        QFile file(file_path);
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            qDebug()<<"Failed to open file";
+            return;
+        }
 
-          QFileInfo fileInfo(file_path);
-          QString fileName = fileInfo.fileName();
+        QFileInfo fileInfo(file_path);
+        QString fileName = fileInfo.fileName();
 
-          QString ControlMessage="File:";
-          ControlMessage=ControlMessage+QString::fromStdString(user->_getUsername())+":"+usernameLabel->text()+":"
-                  +fileName+":";
+        QString ControlMessage="File:";
+        ControlMessage=ControlMessage+QString::fromStdString(user->_getUsername())+":"+usernameLabel->text()+":"
+                +fileName+":";
 
-          qint32 fileSize = file.size();
-          qDebug() << "File size: " << fileSize;
+        qint32 fileSize = file.size();
+        qDebug() << "File size: " << fileSize;
 
-          ControlMessage=ControlMessage+QString::number(fileSize);
+        ControlMessage=ControlMessage+QString::number(fileSize);
 
-          socket->write(QString(ControlMessage).toUtf8());
-          socket->waitForBytesWritten();
+        socket->write(QString(ControlMessage).toUtf8());
+        socket->waitForBytesWritten();
 
-          QDataStream out(this->socket);
-          out.setVersion(QDataStream::Qt_5_0);
+        QDataStream out(this->socket);
+        out.setVersion(QDataStream::Qt_5_0);
 
-          QByteArray data = file.readAll();
-          out.writeRawData(data.constData(), data.size());
-          qDebug() << "Sent " << data.size() << " bytes.";
+        QByteArray data = file.readAll();
+        out.writeRawData(data.constData(), data.size());
+        qDebug() << "Sent " << data.size() << " bytes.";
 
-          Message *newMessage=new Message(QString::fromStdString(user->_getUsername()),usernameLabel->text(),fileName);
-          this->messages.append(newMessage);
-          setMessages();
+        Message *newMessage=new Message(QString::fromStdString(user->_getUsername()),usernameLabel->text(),fileName);
+        this->messages.append(newMessage);
+        setMessages();
 
-          file.close();
+        file.close();
     }
 
 }

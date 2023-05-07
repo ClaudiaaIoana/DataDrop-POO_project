@@ -77,24 +77,39 @@ void Connection_manager::requests(SOCKET clientSocket)
 				if (login(segments[1],segments[2]))
 				{
 					strcpy(message, "Corect:");
-					std::string			list = this->give_friend_list(segments[1]);
-					if (list.empty())
+					std::string			friend_list = this->give_friend_list(segments[1]);
+					if (friend_list.empty())
 					{
 						strcat(message, "FaraPrieteni");
 					}
 					else
 					{
 						strcat(message, "CuPrieteni:");
-						strcat(message, list.data());
+						strcat(message, friend_list.data());
 					}
-					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
-					conected_users_sockets.push_back(ClientSocket(segments[1], clientSocket));
+					messageLength = strlen(message);
+					send(clientSocket, message, messageLength, 0);
+					Sleep(10);
 
+					std::string			group_list = this->give_friend_list(segments[1]);
+					if (group_list.empty())
+					{
+						strcat(message, "FaraGrupuri");
+					}
+					else
+					{
+						strcat(message, "CuGrupuri:");
+						strcat(message, group_list.data());
+					}
 					messageLength = strlen(message);
 					send(clientSocket, message, messageLength, 0);
 
-					Sleep(10);
+					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
+					conected_users_sockets.push_back(ClientSocket(segments[1], clientSocket));
+
+					//Sleep(10);
 					send_messages_at_connection(clientSocket, segments[1]);
+					
 					send_files_at_connection(clientSocket, segments[1]);
 				}
 				else
@@ -180,6 +195,52 @@ void Connection_manager::requests(SOCKET clientSocket)
 				DB::get_instance()->create_group_with_members(segments[1], std::vector<std::string>(segments.begin() + 2, segments.end()));
 			}
 
+			//MESAJ PE GRUP
+
+			else if (segments[0] == "Mesaj_grup")
+			{
+				std::vector<std::string>		group_members = DB::get_instance()->get_group_members(segments[1], segments[2]);
+				bool							pushed = false;
+				int								index = 0;
+
+				for (auto it = group_members.begin(); it != group_members.end(); it++)
+				{
+					SOCKET receiver = is_connected((*it));
+					if (receiver != NULL)
+					{
+						this->send_group_message_for_connected_user(receiver, segments[1], segments[2], segments[3]);
+					}
+					else
+					{
+						if(!pushed)
+							index=DB::get_instance()->push_group_messages(segments[1], segments[2], segments[3]);
+						DB::get_instance()->push_group_message_for_user(index, (*it));
+					}
+				}
+			}
+
+			//GROUP FILE RECEIVING AND SENDING
+
+			else if (segments[0] == "File_grup")
+			{
+				int					dimension = std::stoi(segments[4]);
+				char* content = new char[dimension];
+				SOCKET				receiver = is_connected(segments[2]);
+
+				memset(content, 0, dimension);
+
+				int					current_size = 0;
+				int					bytes_returned = 0;
+				while (current_size < dimension)
+				{
+					Sleep(10);
+					bytes_returned = recv(clientSocket, content + current_size, CHUNK_SIZE, 0);
+					current_size += bytes_returned;
+				}
+
+				File file(segments[1], segments[2], segments[3], dimension);
+			}
+
 			buffer[0] = '\0';
 
 		}
@@ -249,6 +310,21 @@ std::string Connection_manager::give_friend_list(std::string username)
 	return friend_list_packet;
 }
 
+std::string Connection_manager::give_group_list(std::string username)
+{
+	std::string					group_list_packet;
+
+	std::vector<std::string>	group_list;
+	group_list = DB::get_instance()->get_friend_list(username);
+	for (auto friend_ = group_list.begin(); friend_ != group_list.end(); friend_++, group_list_packet += ":")
+	{
+		group_list_packet += *friend_;
+	}
+	if (!group_list_packet.empty())
+		group_list_packet.pop_back();
+	return group_list_packet;
+}
+
 void Connection_manager::register_(std::string email,std::string username, std::string password)
 {
 	std::cout << "---------register---------\n";
@@ -310,11 +386,56 @@ void Connection_manager::send_messages_at_connection(SOCKET clientSocket, std::s
 	DB::get_instance()->delete_sent_messages(username);
 }
 
+void Connection_manager::send_group_message_at_connection(SOCKET clientSocket, std::string receiver)
+{
+	std::vector<std::pair<std::string, std::string>> group_message;
+	int												 messageLength;
+	char											 message[2048] = "\0";
+	group_message = DB::get_instance()->pop_waiting_group_messages(receiver);
+
+	for (auto it = group_message.begin(); it != group_message.end(); it++)
+	{
+		strcpy(message, "Mesaj_grup:");
+		strcat(message, (*it).first.c_str());
+		strcat(message, ":");
+		strcat(message, receiver.c_str());
+		strcat(message, ":");
+		strcat(message, (*it).second.c_str());
+		strcat(message, "\0");
+
+		uint32_t dimension;
+		dimension = strlen(message);
+		messageLength = strlen(message);
+
+		send(clientSocket, (char*)&dimension, sizeof(dimension), 0);
+		send(clientSocket, message, messageLength, 0);
+		Sleep(100);
+	}
+	DB::get_instance()->delete_sent_group_messages(receiver);
+}
+
 void Connection_manager::send_message_for_connected_user(SOCKET receiver, std::string sender, std::string receiver_username, std::string message_content)
 {	
 	char				message[2048];
 	strcpy(message, "Mesaj:");
 	strcat(message, sender.c_str());
+	strcat(message, ":");
+	strcat(message, receiver_username.c_str());
+	strcat(message, ":");
+	strcat(message, message_content.c_str());
+	strcat(message, "\0");
+
+	uint32_t messageLength = strlen(message);
+
+	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
+	send(receiver, message, messageLength, 0);
+}
+
+void Connection_manager::send_group_message_for_connected_user(SOCKET receiver, std::string group, std::string receiver_username, std::string message_content)
+{
+	char				message[2048];
+	strcpy(message, "Mesaj_grup:");
+	strcat(message, group.c_str());
 	strcat(message, ":");
 	strcat(message, receiver_username.c_str());
 	strcat(message, ":");
@@ -371,7 +492,8 @@ void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::stri
 		fwrite((*it).second, 1, (*it).first.get_dimension(), fout);
 		fclose(fout);
 	}
-	//TODO DELETE 
+
+	DB::get_instance()->delete_sent_files(receiver);
 }
 
 void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& file, char* content)
@@ -402,6 +524,7 @@ void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& 
 		sent += 1024 * 3;
 
 	}
+
 }
 
 

@@ -101,8 +101,10 @@ void Connection_manager::requests(SOCKET clientSocket)
 						strcpy(message, "CuGrupuri:");
 						strcat(message, group_list.data());
 					}
+
 					messageLength = strlen(message);
 					send(clientSocket, message, messageLength, 0);
+					Sleep(10);
 
 					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
 					conected_users_sockets.push_back(ClientSocket(segments[1], clientSocket));
@@ -112,6 +114,7 @@ void Connection_manager::requests(SOCKET clientSocket)
 					send_group_message_at_connection(clientSocket, segments[1]);
 
 					send_files_at_connection(clientSocket, segments[1]);
+					send_group_files_at_connection(clientSocket, segments[1]);
 				}
 				else
 				{
@@ -227,14 +230,16 @@ void Connection_manager::requests(SOCKET clientSocket)
 
 			else if (segments[0] == "File_grup")
 			{
-				int					dimension = std::stoi(segments[4]);
-				char* content = new char[dimension];
-				SOCKET				receiver = is_connected(segments[2]);
+				int								dimension = std::stoi(segments[4]);
+				char*							content = new char[dimension];
+				std::vector<std::string>		group_members = DB::get_instance()->get_group_members(segments[1], segments[2]);
+				bool							pushed = false;
+				int								index = 0;
+				int								current_size = 0; 
+				int								bytes_returned = 0;
 
 				memset(content, 0, dimension);
 
-				int					current_size = 0;
-				int					bytes_returned = 0;
 				while (current_size < dimension)
 				{
 					Sleep(10);
@@ -242,7 +247,26 @@ void Connection_manager::requests(SOCKET clientSocket)
 					current_size += bytes_returned;
 				}
 
-				File file(segments[1], segments[2], segments[3], dimension);
+				File file(segments[2], segments[1], segments[3], dimension);
+
+				for (auto it = group_members.begin(); it != group_members.end(); it++)
+				{
+					SOCKET receiver = is_connected((*it));
+					if (receiver != NULL)
+					{
+						this->send_group_files_for_connected_client(receiver, file, (*it), content);
+					}
+					else
+					{
+						if (!pushed)
+						{
+							index = DB::get_instance()->push_waiting_group_files(file, content);
+							pushed = true;
+						}
+						DB::get_instance()->push_waiting_group_files_for_user(index, (*it));
+					}
+				}
+				delete content;
 			}
 
 			buffer[0] = '\0';
@@ -413,7 +437,6 @@ void Connection_manager::send_group_message_at_connection(SOCKET clientSocket, s
 
 		send(clientSocket, (char*)&dimension, sizeof(dimension), 0);
 		send(clientSocket, message, messageLength, 0);
-		Sleep(100);
 	}
 	DB::get_instance()->delete_sent_group_messages(receiver);
 }
@@ -454,7 +477,6 @@ void Connection_manager::send_group_message_for_connected_user(SOCKET receiver, 
 
 void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::string receiver)
 {
-	//TODO
 	std::vector<std::pair<File, char*>>				 whole_file;
 	char											 message[1024];
 	int												 messageLength;
@@ -500,6 +522,53 @@ void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::stri
 	DB::get_instance()->delete_sent_files(receiver);
 }
 
+void Connection_manager::send_group_files_at_connection(SOCKET clientSocket, std::string receiver)
+{
+	std::vector<std::pair<File, char*>>				 whole_file;
+	char											 message[1024];
+	int												 messageLength;
+	whole_file = DB::get_instance()->pop_waiting_group_files(receiver);
+
+	for (auto it = whole_file.begin(); it != whole_file.end(); it++)
+	{
+		message[0] = '\0';
+		strcpy(message, "File:");
+		strcat(message, (*it).first.get_sender().c_str());
+		strcat(message, ":");
+		strcat(message, receiver.c_str());
+		strcat(message, ":");
+		strcat(message, (*it).first.get_name().c_str());
+		strcat(message, ":");
+		strcat(message, std::to_string((*it).first.get_dimension()).c_str());
+		strcat(message, "\0");
+
+		uint32_t dimension;
+		dimension = strlen(message);
+		messageLength = strlen(message);
+
+		send(clientSocket, (char*)&dimension, sizeof(dimension), 0);
+		send(clientSocket, message, messageLength, 0);
+		Sleep(10);
+		//send(clientSocket, (*it).second, (*it).first.get_dimension(), 0);
+		int						sent = 0;
+		while (sent < (*it).first.get_dimension())
+		{
+			Sleep(10);
+			int			bytesToSend = min(1024 * 3, (*it).first.get_dimension() - sent);
+			send(clientSocket, (*it).second + sent, bytesToSend, 0);
+			sent += 1024 * 3;
+
+		}
+
+		//TODO ERASE
+		FILE* fout = fopen((*it).first.get_name().c_str(), "wb");
+		fwrite((*it).second, 1, (*it).first.get_dimension(), fout);
+		fclose(fout);
+	}
+
+	DB::get_instance()->delete_sent_group_files(receiver);
+}
+
 void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& file, char* content)
 {
 	char				message[2048];
@@ -514,6 +583,37 @@ void Connection_manager::send_files_for_connected_client(SOCKET receiver, File& 
 	strcat(message, "\0");
 
 	uint32_t messageLength = strlen(message);
+
+	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
+	send(receiver, message, messageLength, 0);
+	Sleep(10);
+
+	int						sent = 0;
+	while (sent < file.get_dimension())
+	{
+		Sleep(10);
+		int			bytesToSend = min(1024 * 3, file.get_dimension() - sent);
+		send(receiver, content + sent, bytesToSend, 0);
+		sent += 1024 * 3;
+
+	}
+
+}
+
+void Connection_manager::send_group_files_for_connected_client(SOCKET receiver, File& file, std::string receiver_username, char* content)
+{
+	char				message[2048];
+	strcpy(message, "File:");
+	strcat(message, file.get_receiver().c_str());
+	strcat(message, ":");
+	strcat(message, receiver_username.c_str());
+	strcat(message, ":");
+	strcat(message, file.get_name().c_str());
+	strcat(message, ":");
+	strcat(message, std::to_string(file.get_dimension()).c_str());
+	strcat(message, "\0");
+
+	uint32_t			messageLength = strlen(message);
 
 	send(receiver, (char*)&messageLength, sizeof(messageLength), 0);
 	send(receiver, message, messageLength, 0);

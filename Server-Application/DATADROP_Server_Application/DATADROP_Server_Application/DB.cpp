@@ -901,4 +901,208 @@ std::vector<std::string> DB::get_group_members(std::string group, std::string se
     return group_members;
 }
 
+int DB::push_waiting_group_files(File& file, char* content)
+{
+    SQLRETURN    retcode;
+    SQLINTEGER   index;
+    int          dimension = file.get_dimension();
+    SQLLEN       cbData = dimension;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"exec insert_file_group @Group= ? ,@Sender= ? ,@Name= ? , @Dimension= ? , @File_content= ? , @index= ? output";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, file.get_receiver().length(), 0, (SQLPOINTER)file.get_receiver().c_str(), file.get_receiver().length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, file.get_sender().length(), 0, (SQLPOINTER)file.get_sender().c_str(), file.get_sender().length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, file.get_name().length(), 0, (SQLPOINTER)file.get_name().c_str(), file.get_name().length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &dimension, 0, NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_BINARY, SQL_LONGVARBINARY, dimension, 0, (SQLPOINTER)content, 0, &cbData);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    // Bind output parameter to the statement
+    retcode = SQLBindParameter(hstmt, 6, SQL_PARAM_OUTPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &index, 0, NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "MESSAGE STORED" << std::endl;
+
+        // Bind output value to the index variable
+        retcode = SQLBindCol(hstmt, 1, SQL_C_LONG, &index, 0, NULL);
+        if (!SQL_SUCCEEDED(retcode)) {
+            //TODO: Handle error
+        }
+
+        // Fetch the output value
+        retcode = SQLFetch(hstmt);
+        if (!SQL_SUCCEEDED(retcode)) {
+            //TODO: Handle error
+        }
+
+        return static_cast<int>(index);
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+    return 0;
+}
+
+void DB::push_waiting_group_files_for_user(int group_index, std::string receiver)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"INSERT INTO GroupFilesUsers VALUES( ? , (SELECT TOP(1) UserID FROM Users WHERE UserName = ? )) ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &group_index, 0, NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "FILE STORED FOR THE USER" << receiver << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+}
+
+std::vector<std::pair<File, char*>> DB::pop_waiting_group_files(std::string receiver)
+{
+    std::vector<std::pair<File, char*>>        whole_file;
+    SQLRETURN                                  retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"EXEC get_file_group @Username= ?";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+
+        SQLCHAR sqlGroup[SQL_RESULT_LEN];
+        SQLLEN ptrSqlGroup;
+        SQLCHAR sqlName[SQL_RESULT_LEN];
+        SQLLEN ptrSqlName;
+        SQLINTEGER Dimension;
+        SQLCHAR* binaryVal;
+        SQLLEN binaryValLen;
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            SQLGetData(hstmt, 1, SQL_CHAR, sqlGroup, SQL_RESULT_LEN, &ptrSqlGroup);
+            SQLGetData(hstmt, 2, SQL_CHAR, sqlName, SQL_RESULT_LEN, &ptrSqlName);
+            SQLGetData(hstmt, 3, SQL_C_LONG, &Dimension, 0, NULL);
+            binaryVal = new SQLCHAR[Dimension];
+            SQLGetData(hstmt, 4, SQL_C_BINARY, binaryVal, Dimension, &binaryValLen);
+            whole_file.push_back(std::make_pair(File("",(char*)sqlGroup, (char*)sqlName, (int)Dimension), (char*)binaryVal));
+
+        }
+
+        std::cout << "SENDING FILES TO " << receiver << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE SENDING MESSAGE" << std::endl;
+    }
+
+    return whole_file;
+}
+
+void DB::delete_sent_group_files(std::string receiver)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"DELETE GroupFilesUsers FROM GroupFilesUsers AS GF INNER JOIN Users AS U ON GF.ReceiverID=U.UserID	WHERE U.UserName= ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "GROUP FILES DELETED " << std::endl;
+    }
+    else if (retcode == 100)
+    {
+        std::cout << "NO GROUP FILES LEFT" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE DELETING GROUP WAITING MESSAGES" << std::endl;
+    }
+}
+
 

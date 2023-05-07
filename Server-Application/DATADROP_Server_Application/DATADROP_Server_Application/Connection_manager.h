@@ -34,7 +34,9 @@ private:
 	void						send_message_for_connected_user(SOCKET receiver, std::string sender, std::string receiver_username, std::string message_content);
 	void						send_group_message_for_connected_user(SOCKET receiver, std::string group, std::string receiver_username, std::string message_content);
 	void						send_files_at_connection(SOCKET clientSocket, std::string receiver);
+	void						send_group_files_at_connection(SOCKET clientSocket, std::string receiver);
 	void						send_files_for_connected_client(SOCKET receiver, File& file, char* contennt);
+	void						send_group_files_for_connected_client(SOCKET receiver, File& file,std::string receiver_username, char* content);
 public:
 	static						Connection_manager* get_instance();
 	static						void destroy_instance();

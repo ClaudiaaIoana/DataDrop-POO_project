@@ -406,40 +406,84 @@ void AppInterface::on_AttachButton_clicked()
     QString file_path = QFileDialog::getOpenFileName(this, "Selectați un fișier", "", "Toate fișierele (*.*)");
     if (!file_path.isEmpty())
     {
-        QFile file(file_path);
-        if (!file.open(QIODevice::ReadOnly))
+        QString ControlMessage;
+        if(user->isGroup(usernameLabel->text()))
         {
-            qDebug()<<"Failed to open file";
-            return;
+            QFile file(file_path);
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                qDebug()<<"Failed to open file";
+                return;
+            }
+            ControlMessage="File_grup:";
+            QFileInfo fileInfo(file_path);
+            QString fileName = fileInfo.fileName();
+
+            ControlMessage=ControlMessage+usernameLabel->text()+":"+QString::fromStdString(user->_getUsername())+":"+fileName+":";
+
+            qint32 fileSize = file.size();
+            qDebug() << "File size: " << fileSize;
+
+            ControlMessage=ControlMessage+QString::number(fileSize);
+
+            socket->write(QString(ControlMessage).toUtf8());
+            socket->waitForBytesWritten();
+
+            QDataStream out(this->socket);
+            out.setVersion(QDataStream::Qt_5_0);
+
+            QByteArray data = file.readAll();
+            out.writeRawData(data.constData(), data.size());
+            qDebug() << "Sent " << data.size() << " bytes.";
+
+            Message *newMessage=new Message(QString::fromStdString(user->_getUsername()),usernameLabel->text(),fileName);
+            this->messages.append(newMessage);
+            setMessages();
+
+            file.close();
+
+
+
+        }
+        else
+        {
+            QFile file(file_path);
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                qDebug()<<"Failed to open file";
+                return;
+            }
+               ControlMessage="File:";
+               QFileInfo fileInfo(file_path);
+               QString fileName = fileInfo.fileName();
+
+               ControlMessage=ControlMessage+QString::fromStdString(user->_getUsername())+":"+usernameLabel->text()+":"
+                       +fileName+":";
+
+               qint32 fileSize = file.size();
+               qDebug() << "File size: " << fileSize;
+
+               ControlMessage=ControlMessage+QString::number(fileSize);
+
+               socket->write(QString(ControlMessage).toUtf8());
+               socket->waitForBytesWritten();
+
+               QDataStream out(this->socket);
+               out.setVersion(QDataStream::Qt_5_0);
+
+               QByteArray data = file.readAll();
+               out.writeRawData(data.constData(), data.size());
+               qDebug() << "Sent " << data.size() << " bytes.";
+
+               Message *newMessage=new Message(QString::fromStdString(user->_getUsername()),usernameLabel->text(),fileName);
+               this->messages.append(newMessage);
+               setMessages();
+
+               file.close();
+
         }
 
-        QFileInfo fileInfo(file_path);
-        QString fileName = fileInfo.fileName();
 
-        QString ControlMessage="File:";
-        ControlMessage=ControlMessage+QString::fromStdString(user->_getUsername())+":"+usernameLabel->text()+":"
-                +fileName+":";
-
-        qint32 fileSize = file.size();
-        qDebug() << "File size: " << fileSize;
-
-        ControlMessage=ControlMessage+QString::number(fileSize);
-
-        socket->write(QString(ControlMessage).toUtf8());
-        socket->waitForBytesWritten();
-
-        QDataStream out(this->socket);
-        out.setVersion(QDataStream::Qt_5_0);
-
-        QByteArray data = file.readAll();
-        out.writeRawData(data.constData(), data.size());
-        qDebug() << "Sent " << data.size() << " bytes.";
-
-        Message *newMessage=new Message(QString::fromStdString(user->_getUsername()),usernameLabel->text(),fileName);
-        this->messages.append(newMessage);
-        setMessages();
-
-        file.close();
     }
 
 }

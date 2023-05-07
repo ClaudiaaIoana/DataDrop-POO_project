@@ -57,3 +57,14 @@ void Abstract_User::_addFriend(QString username)
  {
      this->UsernameFriends.clear();
  }
+
+ bool Abstract_User::isGroup(QString nameGroup)
+ {
+     for ( auto it = GroupName.begin();it!= GroupName.end();it++)
+     {
+         if(QString::fromStdString((*it))==nameGroup)
+             return true;
+     }
+     return false ;
+ }
+

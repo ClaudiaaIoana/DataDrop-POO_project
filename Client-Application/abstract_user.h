@@ -28,6 +28,8 @@ public:
     void _addFriend(QString username);
     void _addGroup(QString GroupName);
 
+    bool isGroup(QString nameGroup);
+
     void _clearFriendsList();
 
 };

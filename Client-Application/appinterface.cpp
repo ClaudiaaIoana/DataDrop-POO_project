@@ -518,14 +518,26 @@ void AppInterface::on_sendButton_clicked()
     QString newMessage=ui->TextLineEdit->text();
     QString username=QString::fromStdString(this->user->_getUsername());
     QString usernameToSend=this->usernameLabel->text();
-    QString message="Mesaj:" +username+":"+usernameToSend+":"+newMessage;
-    if(!newMessage.isEmpty())
-    {
+    if(user->isGroup(usernameToSend))
+      {
+        QString message="Mesaj_grup:" +usernameToSend+":"+username+":"+newMessage;
         socket->write(QString(message).toUtf8());
         socket->waitForBytesWritten();
         qDebug()<<"S-a trimis mesajul:"<<message;
-        Message *message =new Message(username,usernameToSend,newMessage);
-        messages.append(message);
+
+        Message *messageToPush =new Message(username,usernameToSend,newMessage);
+        messages.append(messageToPush);
+        ui->TextLineEdit->setText("");
+        setMessages();
+    }
+    else
+    {
+        QString message="Mesaj:" +username+":"+usernameToSend+":"+newMessage;
+        socket->write(QString(message).toUtf8());
+        socket->waitForBytesWritten();
+        qDebug()<<"S-a trimis mesajul:"<<message;
+        Message *messageToPush =new Message(username,usernameToSend,newMessage);
+        messages.append(messageToPush);
         ui->TextLineEdit->setText("");
         setMessages();
     }

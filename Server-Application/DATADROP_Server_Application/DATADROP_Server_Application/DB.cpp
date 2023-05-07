@@ -753,42 +753,54 @@ void DB::delete_sent_files(std::string receiver)
 int DB::push_group_messages(std::string group, std::string sender, std::string message)
 {
     SQLRETURN retcode;
+    SQLINTEGER index;
 
     resetHanddle();
 
     // Prepare SQL statement
-    SQLWCHAR* QUERY = (SQLWCHAR*)L"GO DECLARE @index int; EXEC insert_message_group @Group = 'POO Project', @Sender = 'Claudia', @Message = 'hei, am terminat', @index = @index OUTPUT; SELECT @index ";
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"EXEC insert_message_group @Group = ?, @Sender = ?, @Message = ?, @index = ? OUTPUT";
     retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
-
     }
 
     // Bind parameters to the statement
     retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, group.length(), 0, (SQLPOINTER)group.c_str(), group.length(), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
-
     }
     retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sender.length(), 0, (SQLPOINTER)sender.c_str(), sender.length(), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
-
     }
     retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, message.length(), 0, (SQLPOINTER)message.c_str(), message.length(), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
-
     }
+
+    // Bind output parameter to the statement
+    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_OUTPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &index, 0, NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
     // Execute the statement
-      // Execute the statement
     retcode = SQLExecute(hstmt);
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
     {
         std::cout << "MESSAGE STORED" << std::endl;
 
-        SQLINTEGER index;
-        SQLGetData(hstmt, 1, SQL_C_LONG, &index, 0, NULL);
+        // Bind output value to the index variable
+        retcode = SQLBindCol(hstmt, 1, SQL_C_LONG, &index, 0, NULL);
+        if (!SQL_SUCCEEDED(retcode)) {
+            //TODO: Handle error
+        }
+
+        // Fetch the output value
+        retcode = SQLFetch(hstmt);
+        if (!SQL_SUCCEEDED(retcode)) {
+            //TODO: Handle error
+        }
 
         return static_cast<int>(index);
     }
@@ -798,6 +810,7 @@ int DB::push_group_messages(std::string group, std::string sender, std::string m
     }
     return 0;
 }
+
 
 void DB::push_group_message_for_user(int index, std::string receiver)
 {

@@ -209,12 +209,15 @@ void Connection_manager::requests(SOCKET clientSocket)
 					SOCKET receiver = is_connected((*it));
 					if (receiver != NULL)
 					{
-						this->send_group_message_for_connected_user(receiver, segments[1], segments[2], segments[3]);
+						this->send_group_message_for_connected_user(receiver, segments[1], (*it), segments[3]);
 					}
 					else
 					{
 						if (!pushed)
+						{
 							index = DB::get_instance()->push_group_messages(segments[1], segments[2], segments[3]);
+							pushed = true;
+						}
 						DB::get_instance()->push_group_message_for_user(index, (*it));
 					}
 				}

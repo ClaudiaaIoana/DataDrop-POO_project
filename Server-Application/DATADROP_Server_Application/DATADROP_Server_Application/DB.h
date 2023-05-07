@@ -43,5 +43,10 @@ public:
 	int														push_group_messages(std::string group, std::string sender, std::string message);
 	void													push_group_message_for_user(int index, std::string receiver);
 	std::vector<std::string>								get_group_members(std::string group, std::string sender);
+	int														push_waiting_group_files(File& file,char* content);
+	void													push_waiting_group_files_for_user(int group_index, std::string receiver);
+	std::vector<std::pair<File, char* >>					pop_waiting_group_files(std::string receiver);
+	void													delete_sent_group_files(std::string receiver);
+
 };
 

@@ -20,8 +20,8 @@ DB::DB()
     retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
 
     // Connect to the SQL Server database
-    //SQLWCHAR* dsn = (SQLWCHAR*)L"DRIVER={SQL Server};SERVER=DESKTOP-0AQ7BL5;DATABASE=DataDrop;Trusted=true;";
-    SQLWCHAR* dsn = (SQLWCHAR*)L"DRIVER={SQL Server};SERVER=DESKTOP-JFOHFRF;DATABASE=DataDrop;Trusted=true;";
+    SQLWCHAR* dsn = (SQLWCHAR*)L"DRIVER={SQL Server};SERVER=DESKTOP-0AQ7BL5;DATABASE=DataDrop;Trusted=true;";
+    //SQLWCHAR* dsn = (SQLWCHAR*)L"DRIVER={SQL Server};SERVER=DESKTOP-JFOHFRF;DATABASE=DataDrop;Trusted=true;";
     switch (SQLDriverConnect(hdbc,
         NULL,
         dsn,
@@ -262,6 +262,52 @@ std::vector<std::string> DB::get_friend_list(std::string username)
     return usernames;
 }
 
+std::vector<std::string> DB::get_group_list(std::string username)
+{
+    std::vector<std::string>        groups;
+    SQLRETURN                       retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"SELECT g.Name FROM Groups AS G INNER JOIN GroupMembers AS GM ON G.GroupID = GM.GroupID INNER JOIN Users AS U ON GM.UserID = U.UserID WHERE U.UserName = ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, username.length(), 0, (SQLPOINTER)username.c_str(), username.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+
+        SQLCHAR sqlUsername[SQL_RESULT_LEN];
+        SQLLEN ptrSqlUsername;
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            SQLGetData(hstmt, 1, SQL_CHAR, sqlUsername, SQL_RESULT_LEN, &ptrSqlUsername);
+            groups.push_back((char*)sqlUsername);
+        }
+
+        std::cout << "FRIEND LIST EXTRACTED" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+
+    return groups;
+}
+
 void DB::push_waiting_message(std::string sender, std::string receiver, std::string message)
 {
     SQLRETURN retcode;
@@ -355,6 +401,55 @@ std::vector<std::pair<std::string, std::string>>  DB::pop_waiting_messages(std::
     return sender_message;
 }
 
+std::vector<std::pair<std::string, std::string>> DB::pop_waiting_group_messages(std::string user)
+{
+    std::vector<std::pair<std::string, std::string>>       group_message;
+    SQLRETURN                                              retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"SELECT GM.Name, GM.Message FROM group_messages_for_user AS GM INNER JOIN Users AS U ON GM.ReceiverID = U.UserID WHERE U.UserName = ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, user.length(), 0, (SQLPOINTER)user.c_str(), user.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+
+        SQLCHAR sqlSender[SQL_RESULT_LEN];
+        SQLLEN ptrSqlSender;
+        SQLCHAR sqlMessage[SQL_RESULT_LEN];
+        SQLLEN ptrSqlMessage;
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            SQLGetData(hstmt, 1, SQL_CHAR, sqlSender, SQL_RESULT_LEN, &ptrSqlSender);
+            SQLGetData(hstmt, 2, SQL_CHAR, sqlMessage, SQL_RESULT_LEN, &ptrSqlMessage);
+            group_message.push_back(std::make_pair((char*)sqlSender, (char*)sqlMessage));
+        }
+
+        std::cout << "SENDING MESSAGES TO " << user << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE SENDING MESSAGE" << std::endl;
+    }
+
+    return group_message;
+}
+
 void DB::delete_sent_messages(std::string receiver)
 {
     SQLRETURN retcode;
@@ -379,7 +474,7 @@ void DB::delete_sent_messages(std::string receiver)
     retcode = SQLExecute(hstmt);
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
     {
-        std::cout << "MESSAGES SENT" << std::endl;
+        std::cout << "MESSAGES DELETED" << std::endl;
     }
     else if (retcode == 100)
     {
@@ -390,6 +485,42 @@ void DB::delete_sent_messages(std::string receiver)
         std::cout << "ERROR WHILE DELETING WAITING MESSAGES" << std::endl;
     }
 
+}
+
+void DB::delete_sent_group_messages(std::string receiver)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"DELETE GroupMessagesUsers FROM GroupMessagesUsers AS GM INNER JOIN Users AS U ON GM.ReceiverID=U.UserID	WHERE U.UserName= ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "GROUP MESSAGES DELETED" << std::endl;
+    }
+    else if (retcode == 100)
+    {
+        std::cout << "NO GROUP MESSAGES LEFT" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE DELETING GROUP WAITING MESSAGES" << std::endl;
+    }
 }
 
 void DB::create_group_with_members(std::string group_name, std::vector<std::string> users)
@@ -582,5 +713,179 @@ std::vector<std::pair<File, char*>> DB::pop_waiting_files(std::string receiver)
     return whole_file;
 }
 
+void DB::delete_sent_files(std::string receiver)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"DELETE WaitingFiles FROM WaitingFiles AS fm INNER JOIN Users AS u ON fm.ReceiverID = u.UserID WHERE u.UserName = ? ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "FILES DELETED" << std::endl;
+    }
+    else if (retcode == 100)
+    {
+        std::cout << "NO FILES LEFT" << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE DELETING WAITING FILES" << std::endl;
+    }
+
+}
+
+int DB::push_group_messages(std::string group, std::string sender, std::string message)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"GO DECLARE @index int; EXEC insert_message_group @Group = 'POO Project', @Sender = 'Claudia', @Message = 'hei, am terminat', @index = @index OUTPUT; SELECT @index ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, group.length(), 0, (SQLPOINTER)group.c_str(), group.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sender.length(), 0, (SQLPOINTER)sender.c_str(), sender.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, message.length(), 0, (SQLPOINTER)message.c_str(), message.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "MESSAGE STORED" << std::endl;
+
+        SQLINTEGER index;
+        SQLGetData(hstmt, 1, SQL_C_LONG, &index, 0, NULL);
+
+        return static_cast<int>(index);
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+    return 0;
+}
+
+void DB::push_group_message_for_user(int index, std::string receiver)
+{
+    SQLRETURN retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"INSERT INTO GroupMessagesUsers VALUES( ? , (SELECT TOP(1) UserID FROM Users WHERE UserName = ? )) ";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &index, 0, NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+    }
+
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, receiver.length(), 0, (SQLPOINTER)receiver.c_str(), receiver.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+      // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+        std::cout << "MESSAGE STORED FOR THE USER"<<receiver << std::endl;
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXECUTING QUERY" << std::endl;
+    }
+}
+
+std::vector<std::string> DB::get_group_members(std::string group, std::string sender)
+{
+    std::vector<std::string>       group_members;
+    SQLRETURN                       retcode;
+
+    resetHanddle();
+
+    // Prepare SQL statement
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"SELECT U.UserName FROM GroupMembers AS GM INNER JOIN Groups AS G ON GM.GroupID = G.GroupID INNER JOIN Users AS U ON GM.UserID = U.UserID WHERE G.Name = ? AND U.UserName <> ?";
+    retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Bind parameters to the statement
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, group.length(), 0, (SQLPOINTER)group.c_str(), group.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sender.length(), 0, (SQLPOINTER)sender.c_str(), sender.length(), NULL);
+    if (!SQL_SUCCEEDED(retcode)) {
+        //TODO: Handle error
+
+    }
+
+    // Execute the statement
+    retcode = SQLExecute(hstmt);
+    if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+    {
+
+        SQLCHAR sqlGroup[SQL_RESULT_LEN];
+        SQLLEN ptrSqlGroup;
+
+        while (SQLFetch(hstmt) == SQL_SUCCESS)
+        {
+            SQLGetData(hstmt, 1, SQL_CHAR, sqlGroup, SQL_RESULT_LEN, &ptrSqlGroup);
+            group_members.push_back((char*)sqlGroup);
+        }
+    }
+    else {
+        //TODO: Handle error
+        std::cout << "ERROR WHILE EXTRACTING GROUP MEMBERS" << std::endl;
+    }
+
+    return group_members;
+}
 
 

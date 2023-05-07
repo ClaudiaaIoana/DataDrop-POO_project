@@ -56,7 +56,15 @@ void MainWindow::on_ButtonLogIn_clicked()
             {
                 user->_clearFriendsList();
             }
-
+            QString groupList=this->NetworkManager->receiveFromServer();
+            QStringList groupToken=groupList.split(':');
+            if(groupToken[0]=="CuGrupuri")
+            {
+                for (auto it = std::next(groupToken.begin(), 1); it != groupToken.end(); ++it)
+                {
+                    user->_addGroup(QString::fromStdString((*it).toStdString()));
+                }
+            }
             AppInterface *app=new AppInterface(user);
             app->show();
        }

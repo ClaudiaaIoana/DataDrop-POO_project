@@ -4,6 +4,7 @@
 #include"_IException.h"
 class Exception:public _IException
 {
+protected:
 	std::string		message;
 	int				code;
 public:

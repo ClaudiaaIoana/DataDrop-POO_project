@@ -286,7 +286,6 @@ void Connection_manager::requests(SOCKET clientSocket)
 	}
 	std::cout << "Connection closed" << std::endl;
 	closesocket(clientSocket);
-	//TODO EXCEPTION
 }
 
 void Connection_manager::listen_()
@@ -512,11 +511,6 @@ void Connection_manager::send_files_at_connection(SOCKET clientSocket, std::stri
 			sent += 1024 * 3;
 
 		}
-
-		//TODO ERASE
-		FILE* fout = fopen((*it).first.get_name().c_str(), "wb");
-		fwrite((*it).second, 1, (*it).first.get_dimension(), fout);
-		fclose(fout);
 	}
 
 	DB::get_instance()->delete_sent_files(receiver);

@@ -131,9 +131,10 @@
     <ClCompile Include="ClientSocket.cpp" />
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Exception_Accepting_connection.cpp" />
+    <ClCompile Include="Exception_alloc.cpp" />
     <ClCompile Include="Exception_connecting_db.cpp" />
     <ClCompile Include="Exception_format.cpp" />
-    <ClCompile Include="Exception_sending.cpp" />
+    <ClCompile Include="Exception_query.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="_IDB.cpp" />
     <ClCompile Include="Log.cpp" />
@@ -147,9 +148,10 @@
     <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Exception_Accepting_connection.h" />
+    <ClInclude Include="Exception_alloc.h" />
     <ClInclude Include="Exception_connecting_db.h" />
     <ClInclude Include="Exception_format.h" />
-    <ClInclude Include="Exception_sending.h" />
+    <ClInclude Include="Exception_query.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="_IDB.h" />
     <ClInclude Include="Log.h" />

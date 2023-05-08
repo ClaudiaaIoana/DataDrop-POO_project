@@ -903,35 +903,39 @@ std::vector<std::string> DB::get_group_members(std::string group, std::string se
 
 int DB::push_waiting_group_files(File& file, char* content)
 {
-    SQLRETURN    retcode;
-    SQLINTEGER   index;
-    int          dimension = file.get_dimension();
-    SQLLEN       cbData = dimension;
+    SQLRETURN       retcode;
+    SQLINTEGER      index;
+
+    std::string     sender = file.get_sender();
+    std::string     group = file.get_receiver();
+    std::string     name = file.get_name();
+    int             dimension = file.get_dimension();
+    SQLLEN          cbData = dimension;
 
     resetHanddle();
 
     // Prepare SQL statement
-    SQLWCHAR* QUERY = (SQLWCHAR*)L"exec insert_file_group @Group= ? ,@Sender= ? ,@Name= ? , @Dimension= ? , @File_content= ? , @index= ? output";
+    SQLWCHAR* QUERY = (SQLWCHAR*)L"exec insert_file_group @Group= ? ,@Sender= ? ,@Name= ? , @Dimension= ? , @File_content= ? , @index= ?  output";
     retcode = SQLPrepare(hstmt, QUERY, SQL_NTS);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
     }
 
     // Bind parameters to the statement
-    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, file.get_receiver().length(), 0, (SQLPOINTER)file.get_receiver().c_str(), file.get_receiver().length(), NULL);
+    retcode = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, group.length(), 0, (SQLPOINTER)group.c_str(), group.length(), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
     }
-    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, file.get_sender().length(), 0, (SQLPOINTER)file.get_sender().c_str(), file.get_sender().length(), NULL);
+    retcode = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sender.length(), 0, (SQLPOINTER)sender.c_str(), sender.length(), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
     }
-    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, file.get_name().length(), 0, (SQLPOINTER)file.get_name().c_str(), file.get_name().length(), NULL);
+    retcode = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, name.length(), 0, (SQLPOINTER)name.c_str(), name.length(), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
     }
 
-    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &dimension, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &dimension, sizeof(int), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
     }
@@ -942,7 +946,7 @@ int DB::push_waiting_group_files(File& file, char* content)
     }
 
     // Bind output parameter to the statement
-    retcode = SQLBindParameter(hstmt, 6, SQL_PARAM_OUTPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &index, 0, NULL);
+    retcode = SQLBindParameter(hstmt, 6, SQL_PARAM_OUTPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &index, sizeof(int), NULL);
     if (!SQL_SUCCEEDED(retcode)) {
         //TODO: Handle error
     }
@@ -951,7 +955,7 @@ int DB::push_waiting_group_files(File& file, char* content)
     retcode = SQLExecute(hstmt);
     if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
     {
-        std::cout << "MESSAGE STORED" << std::endl;
+        std::cout << "FILE STORED" << std::endl;
 
         // Bind output value to the index variable
         retcode = SQLBindCol(hstmt, 1, SQL_C_LONG, &index, 0, NULL);

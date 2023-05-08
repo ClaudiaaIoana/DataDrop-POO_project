@@ -533,7 +533,7 @@ void Connection_manager::send_group_files_at_connection(SOCKET clientSocket, std
 	{
 		message[0] = '\0';
 		strcpy(message, "File:");
-		strcat(message, (*it).first.get_sender().c_str());
+		strcat(message, (*it).first.get_receiver().c_str());
 		strcat(message, ":");
 		strcat(message, receiver.c_str());
 		strcat(message, ":");
@@ -560,10 +560,6 @@ void Connection_manager::send_group_files_at_connection(SOCKET clientSocket, std
 
 		}
 
-		//TODO ERASE
-		FILE* fout = fopen((*it).first.get_name().c_str(), "wb");
-		fwrite((*it).second, 1, (*it).first.get_dimension(), fout);
-		fclose(fout);
 	}
 
 	DB::get_instance()->delete_sent_group_files(receiver);

@@ -89,9 +89,6 @@
     <ClInclude Include="Exception_format.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Log.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DB.h">
       <Filter>Header Files</Filter>
     </ClInclude>

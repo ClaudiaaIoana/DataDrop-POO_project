@@ -25,7 +25,7 @@ class Ui_AddFriend
 {
 public:
     QWidget *centralwidget;
-    QLineEdit *lineEdit;
+    QLineEdit *lineUser;
     QLabel *label;
     QPushButton *AddButton;
     QMenuBar *menubar;
@@ -40,10 +40,10 @@ public:
         AddFriend->setStyleSheet(QString::fromUtf8("background-color: rgb(220, 220, 220);"));
         centralwidget = new QWidget(AddFriend);
         centralwidget->setObjectName("centralwidget");
-        lineEdit = new QLineEdit(centralwidget);
-        lineEdit->setObjectName("lineEdit");
-        lineEdit->setGeometry(QRect(140, 100, 141, 28));
-        lineEdit->setStyleSheet(QString::fromUtf8("border-radius: 10px;\n"
+        lineUser = new QLineEdit(centralwidget);
+        lineUser->setObjectName("lineUser");
+        lineUser->setGeometry(QRect(140, 100, 141, 28));
+        lineUser->setStyleSheet(QString::fromUtf8("border-radius: 10px;\n"
 "font: italic 9pt \"Segoe UI\";\n"
 "background-color: rgb(255,255,255);\n"
 "color:	dark; \n"

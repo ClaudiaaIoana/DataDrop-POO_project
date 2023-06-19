@@ -88,8 +88,9 @@ void Connection_manager::requests(SOCKET clientSocket)
 						strcat(message, friend_list.data());
 					}
 					messageLength = strlen(message);
+					//send(clientSocket, (char*)&messageLength, sizeof(messageLength), 0);
 					send(clientSocket, message, messageLength, 0);
-					Sleep(10);
+					Sleep(50);
 
 					std::string			group_list = this->give_group_list(segments[1]);
 					if (group_list.empty())
@@ -103,17 +104,21 @@ void Connection_manager::requests(SOCKET clientSocket)
 					}
 
 					messageLength = strlen(message);
+					//send(clientSocket, (char*)&messageLength, sizeof(messageLength), 0);
 					send(clientSocket, message, messageLength, 0);
-					Sleep(10);
+					Sleep(20);
 
 					conected_device_sockets.erase(std::remove(conected_device_sockets.begin(), conected_device_sockets.end(), clientSocket), conected_device_sockets.end());
 					conected_users_sockets.push_back(ClientSocket(segments[1], clientSocket));
 
-					//Sleep(10);
+					Sleep(10);
 					send_messages_at_connection(clientSocket, segments[1]);
+					Sleep(10);
 					send_group_message_at_connection(clientSocket, segments[1]);
 
+					Sleep(10);
 					send_files_at_connection(clientSocket, segments[1]);
+					Sleep(10);
 					send_group_files_at_connection(clientSocket, segments[1]);
 				}
 				else

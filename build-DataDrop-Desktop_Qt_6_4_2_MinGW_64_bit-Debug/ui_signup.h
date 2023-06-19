@@ -38,6 +38,7 @@ public:
     QWidget *widget_4;
     QWidget *widget_5;
     QLabel *label;
+    QPushButton *BackButton;
 
     void setupUi(QDialog *SignUp)
     {
@@ -192,6 +193,20 @@ public:
         label->setGeometry(QRect(350, 540, 250, 141));
         label->setStyleSheet(QString::fromUtf8("background-image: url(:/LogoImage.png); \n"
 "background-color:transparent;"));
+        BackButton = new QPushButton(widget);
+        BackButton->setObjectName("BackButton");
+        BackButton->setGeometry(QRect(70, 650, 101, 29));
+        BackButton->setStyleSheet(QString::fromUtf8("#BackButton{\n"
+"background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(23, 37, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
+"border:none ; \n"
+"color:white;\n"
+"font: 10pt \"Segoe UI\";\n"
+"border-radius: 8px;\n"
+"} \n"
+"#BackButton:hover{ \n"
+"	font: 700 9pt \"Segoe UI\";\n"
+"border-radius: 12px;\n"
+"}"));
 
         retranslateUi(SignUp);
 
@@ -208,6 +223,7 @@ public:
         Confirm->setText(QCoreApplication::translate("SignUp", "Confirm Password", nullptr));
         SignUpButton->setText(QCoreApplication::translate("SignUp", "SIGN UP", nullptr));
         label->setText(QString());
+        BackButton->setText(QCoreApplication::translate("SignUp", "Back", nullptr));
     } // retranslateUi
 
 };

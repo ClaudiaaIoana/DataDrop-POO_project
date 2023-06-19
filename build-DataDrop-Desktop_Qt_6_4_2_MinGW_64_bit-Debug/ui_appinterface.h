@@ -11,12 +11,15 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QDockWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QScrollArea>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -29,13 +32,22 @@ public:
     QPushButton *sendButton;
     QLineEdit *TextLineEdit;
     QPushButton *AttachButton;
+    QListWidget *listaMesaje;
     QListWidget *listWidget;
-    QLabel *label;
+    QLabel *labelText;
     QLineEdit *Search;
     QWidget *ScrollZone;
     QWidget *widget;
     QPushButton *AddFriendButton;
     QPushButton *CreateGroupButton;
+    QDockWidget *CreateGrup_2;
+    QWidget *dockWidgetContents_6;
+    QPlainTextEdit *plainTextEdit;
+    QScrollArea *CreateGroupScroll;
+    QWidget *scrollAreaWidgetContents;
+    QLabel *label;
+    QLineEdit *NameGroup;
+    QPushButton *pushButton;
     QMenuBar *menubar;
 
     void setupUi(QMainWindow *AppInterface)
@@ -59,7 +71,11 @@ public:
         ChatZone->setObjectName("ChatZone");
         ChatZone->setGeometry(QRect(270, 0, 551, 791));
         ChatZone->setMaximumSize(QSize(900, 800));
-        ChatZone->setStyleSheet(QString::fromUtf8("image: url(:/qwd83nc4xxf41.jpg);"));
+        ChatZone->setStyleSheet(QString::fromUtf8("image: url(:/qwd83nc4xxf41.jpg);\n"
+" background-repeat: no-repeat;\n"
+"\n"
+"    \n"
+"    opacity: 0.8;"));
         sendButton = new QPushButton(ChatZone);
         sendButton->setObjectName("sendButton");
         sendButton->setGeometry(QRect(470, 505, 31, 31));
@@ -82,21 +98,34 @@ public:
         TextLineEdit->setGeometry(QRect(90, 507, 371, 29));
         QFont font;
         font.setFamilies({QString::fromUtf8("Segoe UI")});
-        font.setPointSize(9);
         font.setBold(false);
         font.setItalic(true);
         TextLineEdit->setFont(font);
-        TextLineEdit->setStyleSheet(QString::fromUtf8("border-radius: 10px;\n"
-"font: italic 9pt \"Segoe UI\";\n"
-"background-color: rgb(255,255,255);\n"
+        TextLineEdit->setStyleSheet(QString::fromUtf8("#TextLineEdit{\n"
+"    background-color: white;\n"
+"    padding: 5px; \n"
+"    font-size: 14px;\n"
+"    color: black;\n"
+"    outline: none;\n"
+"}\n"
 "\n"
-" background-repeat: no; \n"
-"  width: 200px;\n"
-"  height: 50px;\n"
-"  padding: 0;\n"
-"  border: none;\n"
-"  cursor: pointer; \n"
-" display: inline-block;\n"
+"#TextLineEdit:hover {\n"
+"    border-color: #0078d7;  \n"
+"\n"
+"}\n"
+"\n"
+"#TextLineEdit:focus {\n"
+"    border-color: #0078d7;\n"
+"    box-shadow: 0 0 5px #0078d7;\n"
+"   \n"
+"}\n"
+"  \n"
+"    \n"
+"    \n"
+"\n"
+"\n"
+" \n"
+"\n"
 ""));
         AttachButton = new QPushButton(ChatZone);
         AttachButton->setObjectName("AttachButton");
@@ -111,17 +140,32 @@ public:
 "  border: none;\n"
 "  cursor: pointer; \n"
 " display: inline-block;"));
+        listaMesaje = new QListWidget(ChatZone);
+        listaMesaje->setObjectName("listaMesaje");
+        listaMesaje->setGeometry(QRect(40, 71, 450, 430));
+        QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(listaMesaje->sizePolicy().hasHeightForWidth());
+        listaMesaje->setSizePolicy(sizePolicy1);
+        listaMesaje->setMaximumSize(QSize(450, 430));
+        listaMesaje->setFocusPolicy(Qt::NoFocus);
+        listaMesaje->setStyleSheet(QString::fromUtf8("background-color: transparent;\n"
+"  border: none;\n"
+"  outline: none;"));
+        listaMesaje->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        listaMesaje->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContentsOnFirstShow);
         listWidget = new QListWidget(centralwidget);
         listWidget->setObjectName("listWidget");
         listWidget->setGeometry(QRect(0, 120, 271, 461));
         listWidget->setStyleSheet(QString::fromUtf8("background-color: rgb(245, 245, 245);"));
-        label = new QLabel(centralwidget);
-        label->setObjectName("label");
-        label->setGeometry(QRect(100, 0, 131, 41));
-        label->setStyleSheet(QString::fromUtf8("background-color: transparent;\n"
+        labelText = new QLabel(centralwidget);
+        labelText->setObjectName("labelText");
+        labelText->setGeometry(QRect(130, 0, 121, 41));
+        labelText->setStyleSheet(QString::fromUtf8("background-color: transparent;\n"
 "    color: #1E90FF;\n"
 "    font-family: Arial;\n"
-"    font-size: 24px;\n"
+"    font-size: 14px;\n"
 "    font-weight: bold;\n"
 "    text-align: center;\n"
 "    border: none;"));
@@ -158,6 +202,63 @@ public:
 "border: none; \n"
 "cursor: pointer; \n"
 " background-repeat: no;"));
+        CreateGrup_2 = new QDockWidget(centralwidget);
+        CreateGrup_2->setObjectName("CreateGrup_2");
+        CreateGrup_2->setGeometry(QRect(400, 50, 300, 450));
+        QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(CreateGrup_2->sizePolicy().hasHeightForWidth());
+        CreateGrup_2->setSizePolicy(sizePolicy2);
+        dockWidgetContents_6 = new QWidget();
+        dockWidgetContents_6->setObjectName("dockWidgetContents_6");
+        plainTextEdit = new QPlainTextEdit(dockWidgetContents_6);
+        plainTextEdit->setObjectName("plainTextEdit");
+        plainTextEdit->setGeometry(QRect(90, 10, 141, 31));
+        plainTextEdit->setStyleSheet(QString::fromUtf8("background-color: transparent;\n"
+"    color: #1E90FF;\n"
+"    font-family: Arial;\n"
+"    font-size: 14px;\n"
+"    font-weight: bold;\n"
+"    text-align: center;\n"
+"    border: none;"));
+        CreateGroupScroll = new QScrollArea(dockWidgetContents_6);
+        CreateGroupScroll->setObjectName("CreateGroupScroll");
+        CreateGroupScroll->setGeometry(QRect(20, 134, 271, 281));
+        CreateGroupScroll->setStyleSheet(QString::fromUtf8("border: none; "));
+        CreateGroupScroll->setWidgetResizable(true);
+        scrollAreaWidgetContents = new QWidget();
+        scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 271, 281));
+        CreateGroupScroll->setWidget(scrollAreaWidgetContents);
+        label = new QLabel(dockWidgetContents_6);
+        label->setObjectName("label");
+        label->setGeometry(QRect(20, 100, 261, 20));
+        label->setStyleSheet(QString::fromUtf8("border-radius: 10px;\n"
+"font: italic 9pt \"Segoe UI\";\n"
+"color:	#1E90FF; \n"
+""));
+        NameGroup = new QLineEdit(dockWidgetContents_6);
+        NameGroup->setObjectName("NameGroup");
+        NameGroup->setGeometry(QRect(20, 50, 151, 28));
+        NameGroup->setStyleSheet(QString::fromUtf8("border-radius: 10px;\n"
+"font: italic 9pt \"Segoe UI\";\n"
+"background-color: rgb(245,245,245);\n"
+"color:	#1E90FF; "));
+        pushButton = new QPushButton(dockWidgetContents_6);
+        pushButton->setObjectName("pushButton");
+        pushButton->setGeometry(QRect(190, 50, 83, 29));
+        pushButton->setStyleSheet(QString::fromUtf8("#pushButton{\n"
+"  background-color: white; \n"
+"  color: black; \n"
+"  border: 2px solid #4CAF50;\n"
+"}\n"
+"\n"
+"#pushButton:hover {\n"
+"  background-color: #4CAF50;\n"
+"  color: white;\n"
+"}"));
+        CreateGrup_2->setWidget(dockWidgetContents_6);
         AppInterface->setCentralWidget(centralwidget);
         menubar = new QMenuBar(AppInterface);
         menubar->setObjectName("menubar");
@@ -174,9 +275,13 @@ public:
         AppInterface->setWindowTitle(QCoreApplication::translate("AppInterface", "MainWindow", nullptr));
         sendButton->setText(QString());
         AttachButton->setText(QString());
-        label->setText(QCoreApplication::translate("AppInterface", "       Salut!", nullptr));
+        labelText->setText(QString());
         AddFriendButton->setText(QString());
         CreateGroupButton->setText(QString());
+        plainTextEdit->setPlainText(QCoreApplication::translate("AppInterface", "Create a group", nullptr));
+        label->setText(QString());
+        NameGroup->setPlaceholderText(QCoreApplication::translate("AppInterface", "    Name Your Group", nullptr));
+        pushButton->setText(QCoreApplication::translate("AppInterface", "Finish", nullptr));
     } // retranslateUi
 
 };
